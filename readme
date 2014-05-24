@@ -1,0 +1,44 @@
+
+Overview
+=========
+This is the first prototype of EITool, a tool for controller design and verification with envelope-invariant pairs.
+
+Design goals for this first prototype:
+0. Assume the set of robust parameters is given
+1. Take a single (parametrized) EI pair
+2. Take a user-supplied control law, initial set, and safe set (...)
+	--> Assume: control law is just inline, no ifs and stuff
+3. Output whether or not the refinement conditions are met
+	> Check different combinations of envelope parameters (i.e., grid the parameter space, try points in it)
+	> Use QElim (Mathematica) for this initial prototype
+4. Allow parser to be very weak--assume input is in a form that can be dumped to Mathematica
+5. Even do the gridding of the EI parameters to be done in Mathematica
+
+Future extensions:
+-2. Use a better parser, like the one I have developed, and do the gridding in Java, so solvers other than Mathematica can be used.
+-1. Extend to parsing piecewise control laws
+0. Extend to computing the set of robust parameters
+1. Use dReal
+2. Do refinement by parts
+3. Use something fancy-schmancy like Isabelle?
+
+Summary of procedure
+1. Parse in an envelope-invariant pair, and parameter constraints---mainly from an input file, but support commandline as well
+	\envelope { ... } \invariant { ... } \parameters { ... } \controllaw { ... }
+2. Parse in a control law
+3. Grid the space of envelope parameters;
+4. For each point in the grid of envelope parameters, 
+	a) generate a refinement query in Mathematica
+	b) invoke Mathematica
+	c) If Mathematica says true on any specific EI parameter value, quit and return true
+	d) Else give up after a while
+
+Files
+======
+EITool.java:			The main top-level class, coordinates the pieces
+Parser.java:			Parses the input file, returns strings for each item
+MathematicaInterface.java:	Generates query for Mathematica, invokes Mathematica, monitors the Mathematica output file for success/failure
+build:				Build script
+
+
+
