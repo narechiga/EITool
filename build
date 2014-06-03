@@ -1,0 +1,7 @@
+
+javac src/*;
+mv src/*class bin/;
+
+
+
+
