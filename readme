@@ -24,7 +24,9 @@ Future extensions:
 
 Summary of procedure
 1. Parse in an envelope-invariant pair, and parameter constraints---mainly from an input file, but support commandline as well
-	\envelope { ... } \invariant { ... } \parameters { ... } \controllaw { ... }
+	\envelope { ... } \invariant { ... } \robustparameters { ... } \controllaw { ... }
+	-> separated by newlines since it makes this prototype parser simpler
+
 2. Parse in a control law
 3. Grid the space of envelope parameters;
 4. For each point in the grid of envelope parameters, 
@@ -39,6 +41,7 @@ EITool.java:			The main top-level class, coordinates the pieces
 Parser.java:			Parses the input file, returns strings for each item
 MathematicaInterface.java:	Generates query for Mathematica, invokes Mathematica, monitors the Mathematica output file for success/failure
 build:				Build script
+clean:				Script that deletes items in bin/
 
 
 
