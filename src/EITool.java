@@ -1,6 +1,8 @@
 import java.io.*;
 import java.util.*;
 
+import manticore.dl.*;
+
 
 
 class EITool {
@@ -12,10 +14,18 @@ class EITool {
 
 		System.out.println("My argument is: " + filename);
 
-		System.out.println("The control envelope is: " + Parser.parseEnvelope( filename ) );
-		System.out.println("The invariant is: " + Parser.parseInvariant( filename ));
-		System.out.println("The robust parameters are: " + Parser.parseRobustParameters( filename ));
-		System.out.println("The control law is: " + Parser.parseControlLaw( filename ));
+		try {
+			Lexer eiLexer = new Lexer( new FileReader( args[0] ) );
+			YYParser eiParser = new YYParser( eiLexer );
+			eiParser.parse();
+
+			System.out.println("The control envelope is: " + eiParser.envelope.toKeYmaeraString() );
+			System.out.println("The invariant is: " + eiParser.invariant.toKeYmaeraString() );
+			System.out.println("The robust parameters are: " + eiParser.robustparameters.toKeYmaeraString() );
+			System.out.println("The control law is: " + eiParser.controllaw.toKeYmaeraString() );
+		} catch ( Exception e ) {
+			e.printStackTrace();
+		}
 
 
 	}

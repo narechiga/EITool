@@ -1,20 +1,19 @@
 
-envelope:
+\envelope{
 	true
-end
+}
 
-invariant:
+\invariant{
 	false
-end
+}
 
-robustparameters:
-	unknown
-end
+\robustparameters{
+	x > 0
+}
 
-controllaw:
-	dontcare
-	or false
-end
+\controllaw{
+	false
+}
 
 
 
