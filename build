@@ -1,6 +1,21 @@
+#!/usr/bin/perl
 
-javac src/*;
-mv src/*class bin/;
+# Do clean import of Manticore
+`rm -rf src/manticoredlport`;
+`mkdir src/manticoredlport`;
+`cp \$MANTICORESRC/dl/* src/manticoredlport`;
+
+# Compile
+`cd src/manticoredlport; jflex Lexer.lex; bison YYParser.y`;
+`cd src/manticoredlport; ./GenerateNativeInterpretation`;
+`javac src/*.java src/manticoredlport/*.java`;
+
+# Organize
+`rm -rf bin`;
+`mkdir bin; mkdir bin/manticore; mkdir bin/manticore/dl`;
+`mv src/*.class bin`;
+`mv src/manticoredlport/*.class bin/manticore/dl`;
+
 
 
 
