@@ -2,10 +2,10 @@ import java.io.*;
 import java.util.*;
 
 import manticore.dl.*;
+import honeybee.mathematicakit.*;
 
 
-
-class EITool {
+class HoneyBee {
 
 	public static void main ( String [] args ) {
 
@@ -23,6 +23,15 @@ class EITool {
 			System.out.println("The invariant is: " + eiParser.invariant.toKeYmaeraString() );
 			System.out.println("The robust parameters are: " + eiParser.robustparameters.toKeYmaeraString() );
 			System.out.println("The control law is: " + eiParser.controllaw.toKeYmaeraString() );
+			
+			MathematicaInterface.writeSingleRefinementVerificationQuery(
+										    eiParser.statevariables,
+										    eiParser.eiparameters,
+										    eiParser.envelope,
+										    eiParser.invariant,
+										    eiParser.robustparameters,
+										    eiParser.controllaw
+										    );
 		} catch ( Exception e ) {
 			e.printStackTrace();
 		}
