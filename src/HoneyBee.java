@@ -15,23 +15,41 @@ class HoneyBee {
 		System.out.println("My argument is: " + filename);
 
 		try {
-			Lexer eiLexer = new Lexer( new FileReader( args[0] ) );
-			YYParser eiParser = new YYParser( eiLexer );
-			eiParser.parse();
+			Lexer hbLexer = new Lexer( new FileReader( args[0] ) );
+			YYParser hbParser = new YYParser( hbLexer );
+			hbParser.parse();
 
-			System.out.println("The control envelope is: " + eiParser.envelope.toKeYmaeraString() );
-			System.out.println("The invariant is: " + eiParser.invariant.toKeYmaeraString() );
-			System.out.println("The robust parameters are: " + eiParser.robustparameters.toKeYmaeraString() );
-			System.out.println("The control law is: " + eiParser.controllaw.toKeYmaeraString() );
-			
-			MathematicaInterface.writeSingleRefinementVerificationQuery(
-										    eiParser.statevariables,
-										    eiParser.eiparameters,
-										    eiParser.envelope,
-										    eiParser.invariant,
-										    eiParser.robustparameters,
-										    eiParser.controllaw
-										    );
+			if ( !hbParser.synthesis ) {
+				System.out.println("The control envelope is: " + hbParser.envelope.toKeYmaeraString() );
+				System.out.println("The invariant is: " + hbParser.invariant.toKeYmaeraString() );
+				System.out.println("The robust parameters are: " + hbParser.robustparameters.toKeYmaeraString() );
+				System.out.println("The control law is: " + hbParser.control.toKeYmaeraString() );
+				
+				MathematicaInterface.writeSingleRefinementVerificationQuery(
+											    hbParser.statevariables,
+											    hbParser.eiparameters,
+											    hbParser.envelope,
+											    hbParser.invariant,
+											    hbParser.robustparameters,
+											    hbParser.control
+											    );
+			} else {
+				System.out.println("The control envelope is: " + hbParser.envelope.toKeYmaeraString() );
+				System.out.println("The invariant is: " + hbParser.invariant.toKeYmaeraString() );
+				System.out.println("The robust parameters are: " + hbParser.robustparameters.toKeYmaeraString() );
+				System.out.println("The control template is: " + hbParser.control.toKeYmaeraString() );
+				
+				MathematicaInterface.writeSingleRefinementSynthesisQuery(
+											    hbParser.statevariables,
+											    hbParser.eiparameters,
+											    hbParser.envelope,
+											    hbParser.invariant,
+											    hbParser.robustparameters,
+											    hbParser.control
+											    );
+			}
+
+
 		} catch ( Exception e ) {
 			e.printStackTrace();
 		}

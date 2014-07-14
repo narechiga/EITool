@@ -12,7 +12,7 @@ public class MathematicaInterface {
 							      dLFormula envelope,
 							      dLFormula invariant,
 							      dLFormula robustparameters,
-							      dLFormula controllaw ) {
+							      ConcreteAssignmentProgram controllaw ) {
 
 
 
@@ -28,7 +28,7 @@ public class MathematicaInterface {
 	    eliminationVariables = eliminationVariables + thisEIParameter.toMathematicaString() +", ";
 	    closingBraces = closingBraces + " ]";
 	}
-	refinementQuery = refinementQuery + "\t\t(* robust paramters to choose from *)\n";
+	refinementQuery = refinementQuery + "\t\t(* robust parameters to choose from *)\n";
 	refinementQuery = refinementQuery + "\t\t" + robustparameters.toMathematicaString() + ",\n";
 	
 
@@ -49,9 +49,9 @@ public class MathematicaInterface {
 
 	
 	refinementQuery = "Reduce[\n" + refinementQuery + "\t\t\t" + invariant.toMathematicaString() + ",\n";
-	refinementQuery = refinementQuery + "\t\t" + "Implies[\n\t\t\t " + controllaw.toMathematicaString() + ",\n ";
-	refinementQuery = refinementQuery + "\t\t\t" + envelope.toMathematicaString() + "\n\t\t]\n\t";
-	refinementQuery = refinementQuery + closingBraces + "\n";
+	refinementQuery = controllaw.toMathematicaString() + ";\n\n" + refinementQuery;
+	refinementQuery = refinementQuery + "\t\t\t" + envelope.toMathematicaString() + "\n";
+	refinementQuery = refinementQuery + "\t" + closingBraces + "\n";
 	refinementQuery = refinementQuery + ", " + eliminationVariables + ", Reals ]\n";
 
 
@@ -62,7 +62,7 @@ public class MathematicaInterface {
 		workspacedir.mkdir();
 	    }
 
-	    PrintWriter queryFile = new PrintWriter("workspace/refinementQueryFile.m");
+	    PrintWriter queryFile = new PrintWriter("workspace/refinementVerificationQueryFile.m");
 	    Date date = new Date();
 	    queryFile.println("(* Automatically generated on " + date.toString() + "*)\n\n");
 	    queryFile.println( refinementQuery );
@@ -72,22 +72,80 @@ public class MathematicaInterface {
 	    e.printStackTrace();
 	}
 	
-	//Set<RealVariable> varList = new Set<RealVariable>();
-	//varList.addAll( envelope.getVariables() );
-	// Actually, I may need to declare within the file, who are state variables and who are 
-	// envelope parameters, and who are controlparameters
-	// Since this is single refinement, the only parameters belong to the ei-pair, since the controller has no
-	// parameters
-
-	// Actually, robust parameters are already declared! I could infer state variables just from taking them
-	// out of the controller, which has no parameters, but perhaps it is better form to actually declare them
-	// in the input file.
-	
-	
-	
-
     }
+    
+    public static void writeSingleRefinementSynthesisQuery(
+							      ArrayList<RealVariable> statevariables,
+							      ArrayList<RealVariable> eiparameters,
+							      dLFormula envelope,
+							      dLFormula invariant,
+							      dLFormula robustparameters,
+							      ConcreteAssignmentProgram controltemplate ) {
 
+
+	Set<RealVariable> controlParameters = controltemplate.getRHS().getVariables();
+	controlParameters.removeAll( statevariables );
+	String controlParameterString = controlParameters.toString();
+	controlParameterString = controlParameterString.replace("[", "{");
+	controlParameterString = controlParameterString.replace("]", "}");
+
+	String refinementQuery = "";
+	String closingBraces = "";
+	String eliminationVariables = "{ ";
+
+	Iterator<RealVariable> eiparameteriterator = eiparameters.iterator();
+	RealVariable thisEIParameter;
+	while ( eiparameteriterator.hasNext() ) {
+	    thisEIParameter = eiparameteriterator.next();
+	    refinementQuery = refinementQuery + "\tExists[ " + thisEIParameter.toMathematicaString() + ", \n";
+	    eliminationVariables = eliminationVariables + thisEIParameter.toMathematicaString() +", ";
+	    closingBraces = closingBraces + " ]";
+	}
+	refinementQuery = refinementQuery + "\t\t(* robust parameters to choose from *)\n";
+	refinementQuery = refinementQuery + "\t\t" + robustparameters.toMathematicaString() + ",\n";
+	
+
+	
+	Iterator<RealVariable> statevariableiterator = statevariables.iterator();
+	RealVariable thisStateVariable;
+	while ( statevariableiterator.hasNext() ) {
+	    thisStateVariable = statevariableiterator.next();
+	    refinementQuery = refinementQuery + "\t\tForAll[ " + thisStateVariable.toMathematicaString() + ", \n";
+	    closingBraces = closingBraces + " ]";
+
+	    if ( statevariableiterator.hasNext() ) {
+		eliminationVariables = eliminationVariables + thisStateVariable.toMathematicaString() + ", ";
+	    } else {
+		eliminationVariables =  eliminationVariables + thisStateVariable.toMathematicaString() + " }";
+	    }
+	}
+
+	
+	refinementQuery = "FindInstance[\n" + refinementQuery + "\t\t\t" + invariant.toMathematicaString() + ",\n";
+	refinementQuery = controltemplate.toMathematicaString() + ";\n\n" + refinementQuery;
+	refinementQuery = refinementQuery + "\t\t\t" + envelope.toMathematicaString() + "\n";
+	refinementQuery = refinementQuery + "\t\t" + closingBraces + "\n";
+	refinementQuery = refinementQuery + ", " + controlParameterString + ", Reals ]\n";
+
+
+	try {
+
+	    File workspacedir = new File("workspace");
+	    if (!workspacedir.exists()) {
+		workspacedir.mkdir();
+	    }
+
+	    PrintWriter queryFile = new PrintWriter("workspace/refinementSynthesisQueryFile.m");
+	    Date date = new Date();
+	    queryFile.println("(* Automatically generated on " + date.toString() + "*)\n\n");
+	    queryFile.println( refinementQuery );
+	    queryFile.close();
+
+	} catch ( Exception e ) {
+	    e.printStackTrace();
+	}
+	
+    }
 
 }
 
