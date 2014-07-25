@@ -98,7 +98,7 @@ class HoneyBee {
 			    throw new Exception("Formula is not quantifier free!");
 			}
 			
-			SMTResult myresult = dRealInterface.query( myformula );
+			Valuation myresult = dRealInterface.findInstance( myformula );
 			System.out.println("Result is: " + myresult.toString() );
 			
 		    } else {
