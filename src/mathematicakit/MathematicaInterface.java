@@ -4,9 +4,10 @@ import java.util.*;
 import java.io.*;
 import manticore.dl.*;
 
+
 public class MathematicaInterface {
 
-    public static void writeSingleRefinementVerificationQuery(
+    public static void writeParametricRefinementVerificationQuery(
 							      ArrayList<RealVariable> statevariables,
 							      ArrayList<RealVariable> eiparameters,
 							      dLFormula envelope,
@@ -57,12 +58,12 @@ public class MathematicaInterface {
 
 	try {
 
-	    File workspacedir = new File("workspace");
-	    if (!workspacedir.exists()) {
-		workspacedir.mkdir();
+	    File mathematicaworkspacedir = new File("mathematicaworkspace");
+	    if (!mathematicaworkspacedir.exists()) {
+		mathematicaworkspacedir.mkdir();
 	    }
 
-	    PrintWriter queryFile = new PrintWriter("workspace/refinementVerificationQueryFile.m");
+	    PrintWriter queryFile = new PrintWriter("mathematicaworkspace/refinementVerificationQueryFile.m");
 	    Date date = new Date();
 	    queryFile.println("(* Automatically generated on " + date.toString() + "*)\n\n");
 	    queryFile.println( refinementQuery );
@@ -73,8 +74,9 @@ public class MathematicaInterface {
 	}
 	
     }
+
     
-    public static void writeSingleRefinementSynthesisQuery(
+    public static void writeParametricRefinementSynthesisQuery(
 							      ArrayList<RealVariable> statevariables,
 							      ArrayList<RealVariable> eiparameters,
 							      dLFormula envelope,
@@ -130,12 +132,12 @@ public class MathematicaInterface {
 
 	try {
 
-	    File workspacedir = new File("workspace");
-	    if (!workspacedir.exists()) {
-		workspacedir.mkdir();
+	    File mathematicaworkspacedir = new File("mathematicaworkspace");
+	    if (!mathematicaworkspacedir.exists()) {
+		mathematicaworkspacedir.mkdir();
 	    }
 
-	    PrintWriter queryFile = new PrintWriter("workspace/refinementSynthesisQueryFile.m");
+	    PrintWriter queryFile = new PrintWriter("mathematicaworkspace/refinementSynthesisQueryFile.m");
 	    Date date = new Date();
 	    queryFile.println("(* Automatically generated on " + date.toString() + "*)\n\n");
 	    queryFile.println( refinementQuery );

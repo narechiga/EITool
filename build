@@ -8,14 +8,20 @@
 # Compile
 `cd src/manticoredlport; jflex Lexer.lex; bison YYParser.y`;
 `cd src/manticoredlport; ./GenerateNativeInterpretation`;
-`javac src/*.java src/manticoredlport/*.java src/mathematicakit/*.java`;
+`javac src/*.java src/manticoredlport/*.java src/mathematicakit/*.java src/drealkit/*.java`;
 
 # Organize
 `rm -rf bin`;
-`mkdir bin; mkdir bin/manticore; mkdir bin/manticore/dl; mkdir bin/honeybee; mkdir bin/honeybee/mathematicakit`;
+`mkdir bin; mkdir bin/manticore; mkdir bin/honeybee;`;
 `mv src/*.class bin`;
-`mv src/manticoredlport/*.class bin/manticore/dl`;
-`mv src/mathematicakit/*.class bin/honeybee/mathematicakit/`;
+	# libs
+	`mkdir bin/manticore/dl`;
+	`mkdir bin/honeybee/mathematicakit`;
+	`mkdir bin/honeybee/drealkit`;
+
+	`mv src/manticoredlport/*.class bin/manticore/dl`;
+	`mv src/mathematicakit/*.class bin/honeybee/mathematicakit/`;
+	`mv src/drealkit/*.class bin/honeybee/drealkit/`;
 
 
 

@@ -1,0 +1,65 @@
+package honeybee.drealkit;
+
+public class dRealInterface implements SolverInterface {
+    
+    public static void writeSingleRefinementVerificationQuery(
+							      ArrayList<RealVariable> statevariables,
+							      ArrayList<RealVariable> eiparameters,
+							      dLFormula envelope,
+							      dLFormula invariant,
+							      dLFormula robustparameters,
+							      ConcreteAssignmentProgram controllaw ) {
+
+	String refinementQuery = "(set-logic QF_NRA)\n\n";
+
+	Iterator<RealVariable> eiparameteriterator = eiparameters.iterator();
+	refinementQuery = refinementQuery + ";; Envelope-invariant parameter declaration\n";
+	while ( eiparameteriterator.hasNext() ) {
+	    thisEIParameter = eiparameteriterator.next();
+	    refinementQuery = refinementQuery + "\tExists[ " + thisEIParameter.toMathematicaString() + ", \n";
+	    eliminationVariables = eliminationVariables + thisEIParameter.toMathematicaString() +", ";
+	    closingBraces = closingBraces + " ]";
+	}
+	refinementQuery = refinementQuery + "\t\t(* robust parameters to choose from *)\n";
+	refinementQuery = refinementQuery + "\t\t" + robustparameters.toMathematicaString() + ",\n";
+	
+	refinementQuery = refimementQuery + "\n(check-sat)\n(exit)\n";
+
+	try {
+
+	    File drealworkspacedir = new File("drealworkspace");
+	    if (!drealworkspacedir.exists()) {
+		drealworkspacedir.mkdir();
+	    }
+
+	    PrintWriter queryFile = new PrintWriter("drealworkspace/refinementVerificationQueryFile.smt2");
+	    Date date = new Date();
+	    queryFile.println(";; Automatically generated on " + date.toString() + "\n\n");
+	    queryFile.println( refinementQuery );
+	    queryFile.close();
+
+	} catch ( Exception e ) {
+	    e.printStackTrace();
+	}
+ 	System.out.println("ladeeda");
+
+	
+    }
+
+    public static void getParameterValues( ValuationList oldValues, dLFormula robustparameters ) {
+	System.out.println("ladeeda");
+    }
+
+
+    public static void writeSingleRefinementSynthesisQuery(
+							   ArrayList<RealVariable> statevariables,
+							   ArrayList<RealVariable> eiparameters,
+							   dLFormula envelope,
+							   dLFormula invariant,
+							   dLFormula robustparameters,
+							   ConcreteAssignmentProgram controltemplate ) {
+	System.out.println("ladeeda");
+    }
+    
+    
+}
