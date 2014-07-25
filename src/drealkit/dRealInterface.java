@@ -10,216 +10,313 @@ import java.util.*;
 
 public class dRealInterface  {
 
-    public static SMTResult resolve ( dLFormula thisFormula ) throws Exception {
-	SMTResult result = new SMTResult();
-	
-	NotFormula negatedFormula = new NotFormula( thisFormula );
-	File queryFile = writeQueryFile( negatedFormula );
-	
-	ProcessBuilder queryPB = new ProcessBuilder("dReal", "--model", "--precision=0.00001", queryFile.getAbsolutePath() );
-	queryPB.redirectErrorStream( true );
-	Process queryProcess = queryPB.start();
-	BufferedReader dRealSays = new BufferedReader( new InputStreamReader(queryProcess.getInputStream()) );
+	protected double precision;
 
-	String line;
-	if ( (line = dRealSays.readLine()) != null ) {
-	    if ( line.equals("unsat")) {
-		result.isValid = true;
-		result.valuation = new Valuation();
-	    } else if ( line.equals("sat") ) {
-		result.isValid = false;
-		result.valuation = extractModel( new File( queryFile.getAbsolutePath() + ".model") );
-	    } else {
-		throw new Exception( line );
-	    }
-	} else {
-	    throw new Exception("dReal returned no output!");
+	public dRealInterface( double precision ) {
+		this.precision = precision;
 	}
 
-	return result;
-	
-    }
-
-    public static Valuation findInstance ( dLFormula thisFormula ) throws Exception {
-	Valuation result;
-	
-	File queryFile = writeQueryFile( thisFormula );
-	
-	ProcessBuilder queryPB = new ProcessBuilder("dReal", "--model", "--precision=0.00001", queryFile.getAbsolutePath() );
-	queryPB.redirectErrorStream( true );
-	Process queryProcess = queryPB.start();
-	BufferedReader dRealSays = new BufferedReader( new InputStreamReader(queryProcess.getInputStream()) );
-
-	String line;
-	if ( (line = dRealSays.readLine()) != null ) {
-	    if ( line.equals("unsat")) {
-		result = new Valuation();
-	    } else if ( line.equals("sat") ) {
-		result = extractModel( new File( queryFile.getAbsolutePath() + ".model") );
-	    } else {
-		throw new Exception( line );
-	    }
-	} else {
-	    throw new Exception("dReal returned no output!");
+	public dRealInterface() {
+		this.precision = 0.00001;
 	}
 
-	return result;
-	
-    }
 
-    public static Valuation extractModel( File modelFile ) throws Exception {
-	Valuation model = new Valuation();
+	//public SMTResult resolve ( dLFormula thisFormula ) throws Exception {
+	//    
+	//    NotFormula negatedFormula = NotFormula( thisFormula );
+	//    File queryFile = writeQueryFile( negatedFormula );
 
-	BufferedReader modelReader = new BufferedReader( new FileReader(modelFile) );
+	//    return runQuery( queryFile );
 
-	modelReader.readLine();
-	String line;
-	while( (line = modelReader.readLine()) != null ) {
+	//}
 
-		line = line.trim();
-		String[] tokens = line.split("\\s+");
+	public Valuation findInstance ( dLFormula thisFormula ) throws Exception {
+		Valuation result;
 
-		RealVariable variable = new RealVariable( tokens[0] );
-		String lowerBound = tokens[2].replace("[","").replace(",","").replace("(","").replace(";","");
-		String upperBound = tokens[3].replace("]","").replace(")","").replace(";","");
+		File queryFile = writeQueryFile( thisFormula );
+		SMTResult dRealSays = runQuery( queryFile );
 
-		if ( lowerBound.equals("-inf") && upperBound.equals("inf") ) {
-			model.put(variable, new Real(42));
-
-		} else if ( lowerBound.equals("-inf") ) {
-			model.put(variable, new Real( upperBound ));
-			
-		} else if ( upperBound.equals("inf") ) {
-			model.put( variable, new Real( lowerBound ));
-
+		if ( dRealSays.satisfiability.equals("unsat") ) {
+			result = null;
 		} else {
-			model.put( variable, new Real( (Double.parseDouble(upperBound) + Double.parseDouble(lowerBound))/2 ));
+			result = dRealSays.valuation;
+		}
+
+		return result;
+
+	}
+
+	protected SMTResult runQuery( File queryFile ) throws Exception {
+		SMTResult result = new SMTResult();
+
+		String precisionArgument = "--precision=" + precision;
+		ProcessBuilder queryPB = new ProcessBuilder("dReal", "--model", precisionArgument, queryFile.getAbsolutePath() );
+		queryPB.redirectErrorStream( true );
+		Process queryProcess = queryPB.start();
+		BufferedReader dRealSays = new BufferedReader( new InputStreamReader(queryProcess.getInputStream()) );
+
+		String line;
+		if ( (line = dRealSays.readLine()) != null ) {
+			if ( line.equals("unsat")) {
+				result.satisfiability = "unsat";
+				result.valuation = new Valuation();
+			} else if ( line.equals("sat") ) {
+				result.satisfiability = "sat";
+				result.valuation = extractModel( new File( queryFile.getAbsolutePath() + ".model") );
+			} else if ( line.equals("unknown") ) {
+				result.satisfiability = "unknown";
+				result.valuation = null;
+			} else {
+				throw new Exception( line );
+			}
+		} else {
+			throw new Exception("dReal returned no output!");
+		}
+
+		return result;
+	}
+
+	public Valuation extractModel( File modelFile ) throws Exception {
+		Valuation model = new Valuation();
+
+		BufferedReader modelReader = new BufferedReader( new FileReader(modelFile) );
+
+		modelReader.readLine();
+		String line;
+		while( (line = modelReader.readLine()) != null ) {
+
+			line = line.trim();
+			String[] tokens = line.split("\\s+");
+
+			RealVariable variable = new RealVariable( tokens[0] );
+			String lowerBound = tokens[2].replace("[","").replace(",","").replace("(","").replace(";","");
+			String upperBound = tokens[3].replace("]","").replace(")","").replace(";","");
+
+			if ( lowerBound.equals("-inf") && upperBound.equals("inf") ) {
+				model.put(variable, new Real(42));
+
+			} else if ( lowerBound.equals("-inf") ) {
+				model.put(variable, new Real( upperBound ));
+
+			} else if ( upperBound.equals("inf") ) {
+				model.put( variable, new Real( lowerBound ));
+
+			} else {
+				model.put( variable, new Real( (Double.parseDouble(upperBound) + Double.parseDouble(lowerBound))/2 ));
+
+			}
+		}
+
+		System.out.println("model : " + model.toString() );
+		return model;
+	}
+
+
+	protected File writeQueryFile( dLFormula thisFormula ) throws Exception {
+		String queryString = "(set-logic QF_NRA)\n\n";
+
+		Iterator<RealVariable> variableIterator = thisFormula.getVariables().iterator();
+		queryString = queryString + "\n;; Variable declarations\n";
+		RealVariable thisVariable;
+		while ( variableIterator.hasNext() ) {
+			queryString = queryString + "(declare-fun " + variableIterator.next() + " () Real )\n";
+		}
+
+		queryString = queryString + "\n;; Formula\n";
+		queryString = queryString + "(assert " + thisFormula.todRealString() + " )\n";
+
+		queryString = queryString + "\n(check-sat)\n(exit)\n";
+
+
+		File drealworkspacedir = new File("drealworkspace");
+		if (!drealworkspacedir.exists()) {
+			drealworkspacedir.mkdir();
+		}
+
+		double randomID = Math.round(Math.random());
+		Date date = new Date();
+		String filename = "drealworkspace/query." + date.getTime() + "." + randomID + ".smt2";
+		PrintWriter queryFile = new PrintWriter( filename );
+		queryFile.println(";; Automatically generated by HoneyBee on " + date.toString() + "\n");
+		queryFile.println(";; Assertion is " + thisFormula.toMathematicaString() + "\n\n");
+		queryFile.println( queryString );
+		queryFile.close();
+
+		return new File( filename );
+
+	}
+
+	public ComparisonFormula createBallFormula( Valuation center, Real radius ) throws Exception {
+
+		ComparisonFormula ballFormula;
+
+		Set<RealVariable> variables = center.keySet();
+		Iterator<RealVariable> varIterator = variables.iterator();
+
+		String ballString = "";
+		RealVariable thisVar;
+		while ( varIterator.hasNext() ) {
+			thisVar = varIterator.next();
+
+			if ( varIterator.hasNext() ) {
+				ballString = ballString + thisVar +  " + ";
+			} else {
+				ballString = ballString + thisVar;
+			}
+		}
+
+		ballString = ballString + " < " + radius.toMathematicaString();
+
+		ballFormula = (ComparisonFormula)(dLFormula.parseFormula( ballString ));
+
+		return ballFormula;
+
+		// TODO: finishme!
+
+
+	}
+
+	public Valuation parametricVerify (
+			ArrayList<RealVariable> statevariables,
+			ArrayList<RealVariable> eiparameters,
+			dLFormula envelope,
+			dLFormula invariant,
+			dLFormula robustparameters,
+			ConcreteAssignmentProgram controllaw,
+			double resolution ) throws Exception {
+
+		Valuation witnessParameters = null;
+		boolean success = false;
+		dLFormula parameterSamplingFormula = robustparameters;
+		Valuation thisParameter;
+		// Pick  a parameter point, try refinement verification
+		// If it succeeds, return
+		// If it fails, try a different point
+		// continue until dreal returns no more points
+		while ( success == false ) {
+			// Pick a parameter point
+			
+			System.out.println("Choosing a parameter valuation...")
+			thisParameter = findInstance( parameterSamplingFormula );
+			
+			if ( thisParameter == null ) {
+				throw new Exception("No more parameters at this resolution!");
+			}
+			
+			System.out.println("Writing refinement query...")
+			// Try refinement verification
+			File refinementQuery = writeSingleRefinementVerificationQuery(
+					statevariables,
+					eiparameters,
+					envelope,
+					invariant,
+					thisParameter,
+					controllaw );
+			System.out.println("Running refinement query...")
+			SMTResult refinementResult = runQuery( refinementQuery );
+			if ( refinementQuery.equals("unsat") ) {
+				System.out.println("Refinement successful!")
+				success = true;
+				witnessParameters = thisParameter;
+
+			} else { //update parameter formula to try a different point
+				System.out.println("Refinement not succesful, choosing a new parameter vector ")
+				parameterSamplingFormula = new AndFormula( parameterSamplingFormula, createBallFormula( thisParameter, new Real( resolution ) ) );
+			}
 
 		}
-	}
-	
-	System.out.println("model : " + model.toString() );
-	return model;
-    }
 
 
-    protected static File writeQueryFile( dLFormula thisFormula ) throws Exception {
-	String queryString = "(set-logic QF_NRA)\n\n";
+		return witnessParameters;
 
-	Iterator<RealVariable> variableIterator = thisFormula.getVariables().iterator();
-	queryString = queryString + "\n;; Variable declarations\n";
-	RealVariable thisVariable;
-	while ( variableIterator.hasNext() ) {
-	    queryString = queryString + "(declare-fun " + variableIterator.next() + " () Real )\n";
 	}
 
-	queryString = queryString + "\n;; Formula\n";
-	queryString = queryString + "(assert " + thisFormula.todRealString() + " )\n";
+	protected File writeSingleRefinementVerificationQuery(
+			ArrayList<RealVariable> statevariables,
+			ArrayList<RealVariable> eiparameters,
+			dLFormula envelope,
+			dLFormula invariant,
+			Valuation robustparameters,
+			ConcreteAssignmentProgram controllaw ) {
 
-	queryString = queryString + "\n(check-sat)\n(exit)\n";
 
+		System.out.println("TODO: This function should probably throw an exception (dRealInterface.writeSingleRefinementVerificationQuery");
+		String refinementQuery = "(set-logic QF_NRA)\n\n";
 
-	File drealworkspacedir = new File("drealworkspace");
-	if (!drealworkspacedir.exists()) {
-	    drealworkspacedir.mkdir();
+		Iterator<RealVariable> stateVariableIterator = statevariables.iterator();
+		refinementQuery = refinementQuery + "\n;; State variable declaration\n";
+		RealVariable thisStateVariable;
+		while ( stateVariableIterator.hasNext() ) {
+			thisStateVariable = stateVariableIterator.next();
+			refinementQuery = refinementQuery + "(declare-fun " + thisStateVariable.todRealString() + " () Real)\n";
+		}
+
+		Iterator<RealVariable> controlVariableIterator = controllaw.getVariables().iterator();
+		refinementQuery = refinementQuery + "\n;; Control variable declaration\n";
+		RealVariable thisControlVariable;
+		while ( controlVariableIterator.hasNext() ) {
+			thisControlVariable = controlVariableIterator.next();
+			refinementQuery = refinementQuery + "(declare-fun " + thisControlVariable.todRealString() + " () Real)\n";
+		}
+
+		System.out.println("INFO: drealkit requires robustparameter set to be a singleton (cannot evaluate Exists[ Forall[] ]  queries)");
+		System.out.println("INFO: Checking this is difficult, so you may get a very cryptic error if this condition is not met");
+		Iterator<RealVariable> eiparameteriterator = eiparameters.iterator();
+		refinementQuery = refinementQuery + "\n;; Envelope-invariant parameter declaration\n";
+		RealVariable thisEIParameter;
+		while ( eiparameteriterator.hasNext() ) {
+			thisEIParameter = eiparameteriterator.next();
+			refinementQuery = refinementQuery + "(declare-fun " + thisEIParameter.todRealString() + " () Real)\n";
+		}
+
+		refinementQuery = refinementQuery + "\n;; Assert the invariant\n";
+		refinementQuery = refinementQuery + "(assert " + invariant.todRealString() + " )\n";
+
+		refinementQuery = refinementQuery + "\n;; Assert the controllaw\n";
+		refinementQuery = refinementQuery + "(assert " + controllaw.todRealString() + " )\n";
+
+		refinementQuery = refinementQuery + "\n;; Assert the NEGATION of the envelope (remember how dReal works!)\n";
+		NotFormula negatedEnvelope = new NotFormula( envelope );
+		refinementQuery = refinementQuery + "(assert " + negatedEnvelope.todRealString() + " )\n";
+
+		refinementQuery = refinementQuery + "\n(check-sat)\n(exit)\n";
+
+		double randomID = Math.round(Math.random());
+		Date date = new Date();
+		String filename = "drealworkspace/refinementVerificationQuery." + date.getTime() + "." + randomID + ".smt2";
+		try {
+
+			File drealworkspacedir = new File("drealworkspace");
+			if (!drealworkspacedir.exists()) {
+				drealworkspacedir.mkdir();
+			}
+
+			PrintWriter queryFile = new PrintWriter(filename);
+			queryFile.println(";; Automatically generated by HoneyBee on " + date.toString() + "\n\n");
+			queryFile.println( refinementQuery );
+			queryFile.close();
+
+		} catch ( Exception e ) {
+			e.printStackTrace();
+		}
+		return new File( filename );
+
 	}
 
-	double randomID = Math.round(Math.random());
-	Date date = new Date();
-	String filename = "drealworkspace/query." + date.getTime() + "." + randomID + ".smt2";
-	PrintWriter queryFile = new PrintWriter( filename );
-	queryFile.println(";; Automatically generated by HoneyBee on " + date.toString() + "\n");
-	queryFile.println(";; Assertion is " + thisFormula.toMathematicaString() + "\n\n");
-	queryFile.println( queryString );
-	queryFile.close();
-
-	return new File( filename );
-	
-    }
-    
-    public static void writeSingleRefinementVerificationQuery(
-							      ArrayList<RealVariable> statevariables,
-							      ArrayList<RealVariable> eiparameters,
-							      dLFormula envelope,
-							      dLFormula invariant,
-							      dLFormula robustparameters,
-							      ConcreteAssignmentProgram controllaw ) {
-
-
-	System.out.println("TODO: This function should probably throw an exception (dRealInterface.writeSingleRefinementVerificationQuery");
-	String refinementQuery = "(set-logic QF_NRA)\n\n";
-	
-	Iterator<RealVariable> stateVariableIterator = statevariables.iterator();
-	refinementQuery = refinementQuery + "\n;; State variable declaration\n";
-	RealVariable thisStateVariable;
-	while ( stateVariableIterator.hasNext() ) {
-	    thisStateVariable = stateVariableIterator.next();
-	    refinementQuery = refinementQuery + "(declare-fun " + thisStateVariable.todRealString() + " () Real)\n";
+	public void getParameterValues( ValuationList oldValues, dLFormula robustparameters ) {
+		System.out.println("ladeeda");
 	}
 
-	Iterator<RealVariable> controlVariableIterator = controllaw.getVariables().iterator();
-	refinementQuery = refinementQuery + "\n;; Control variable declaration\n";
-	RealVariable thisControlVariable;
-	while ( controlVariableIterator.hasNext() ) {
-	    thisControlVariable = controlVariableIterator.next();
-	    refinementQuery = refinementQuery + "(declare-fun " + thisControlVariable.todRealString() + " () Real)\n";
+
+	public void writeSingleRefinementSynthesisQuery(
+			ArrayList<RealVariable> statevariables,
+			ArrayList<RealVariable> eiparameters,
+			dLFormula envelope,
+			dLFormula invariant,
+			dLFormula robustparameters,
+			ConcreteAssignmentProgram controltemplate ) {
+		System.out.println("ladeeda");
 	}
 
-	System.out.println("INFO: drealkit requires robustparameter set to be a singleton (cannot evaluate Exists[ Forall[] ]  queries)");
-	System.out.println("INFO: Checking this is difficult, so you may get a very cryptic error if this condition is not met");
-	Iterator<RealVariable> eiparameteriterator = eiparameters.iterator();
-	refinementQuery = refinementQuery + "\n;; Envelope-invariant parameter declaration\n";
-	RealVariable thisEIParameter;
-	while ( eiparameteriterator.hasNext() ) {
-	    thisEIParameter = eiparameteriterator.next();
-	    refinementQuery = refinementQuery + "(declare-fun " + thisEIParameter.todRealString() + " () Real)\n";
-	}
-
-	refinementQuery = refinementQuery + "\n;; Assert the invariant\n";
-	refinementQuery = refinementQuery + "(assert " + invariant.todRealString() + " )\n";
-	
-	refinementQuery = refinementQuery + "\n;; Assert the controllaw\n";
-	refinementQuery = refinementQuery + "(assert " + controllaw.todRealString() + " )\n";
-
-	refinementQuery = refinementQuery + "\n;; Assert the NEGATION of the envelope (remember how dReal works!)\n";
-	NotFormula negatedEnvelope = new NotFormula( envelope );
-	refinementQuery = refinementQuery + "(assert " + negatedEnvelope.todRealString() + " )\n";
-	
-	refinementQuery = refinementQuery + "\n(check-sat)\n(exit)\n";
-
-	try {
-
-	    File drealworkspacedir = new File("drealworkspace");
-	    if (!drealworkspacedir.exists()) {
-		drealworkspacedir.mkdir();
-	    }
-
-	    PrintWriter queryFile = new PrintWriter("drealworkspace/refinementVerificationQueryFile.smt2");
-	    Date date = new Date();
-	    queryFile.println(";; Automatically generated by HoneyBee on " + date.toString() + "\n\n");
-	    queryFile.println( refinementQuery );
-	    queryFile.close();
-
-	} catch ( Exception e ) {
-	    e.printStackTrace();
-	}
-	
-    }
-
-    public static void getParameterValues( ValuationList oldValues, dLFormula robustparameters ) {
-	System.out.println("ladeeda");
-    }
-
-
-    public static void writeSingleRefinementSynthesisQuery(
-							   ArrayList<RealVariable> statevariables,
-							   ArrayList<RealVariable> eiparameters,
-							   dLFormula envelope,
-							   dLFormula invariant,
-							   dLFormula robustparameters,
-							   ConcreteAssignmentProgram controltemplate ) {
-	System.out.println("ladeeda");
-    }
-    
 }
 

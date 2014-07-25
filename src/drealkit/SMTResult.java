@@ -4,21 +4,21 @@ import manticore.dl.*;
 
 public class SMTResult {
     
-    boolean isValid;
+    String satisfiability;
     Valuation valuation;
 
-    public SMTResult( boolean isValid, Valuation valuation ) {
-	this.isValid = isValid;
+    public SMTResult( String satisfiability, Valuation valuation ) {
+	this.satisfiability = satisfiability;
 	this.valuation = valuation;
     }
 
     public SMTResult() {
-	this.isValid = false;
+	this.satisfiability = "unknown";
 	this.valuation = null;
     }
 
     public String toString() {
-    	    return "(SMT result:\n\tisValid: " + isValid 
+    	    return "(SMT result:\n\tsatisfiability: " + satisfiability 
     	    		+ "\n\tvaluation: " 
     	    		+ valuation.toString() +"\n)\n";
     }

@@ -36,15 +36,16 @@ class HoneyBee {
 											    hbParser.robustparameters,
 											    hbParser.control
 											    );
-			    dRealInterface.writeSingleRefinementVerificationQuery(
-										  hbParser.statevariables,
-										  hbParser.eiparameters,
-										  hbParser.envelope,
-										  hbParser.invariant,
-										  hbParser.robustparameters,
-										  hbParser.control
-										  );
-			      
+			    dRealInterface dreal = new dRealInterface( 0.00001 );
+			    //dreal.writeSingleRefinementVerificationQuery(
+			    //    						  hbParser.statevariables,
+			    //    						  hbParser.eiparameters,
+			    //    						  hbParser.envelope,
+			    //    						  hbParser.invariant,
+			    //    						  hbParser.robustparameters,
+			    //    						  hbParser.control
+			    //    						  );
+			    //  
 			} else {
 			    System.out.println("The control envelope is: " + hbParser.envelope.toKeYmaeraString() );
 			    System.out.println("The invariant is: " + hbParser.invariant.toKeYmaeraString() );
@@ -98,8 +99,13 @@ class HoneyBee {
 			    throw new Exception("Formula is not quantifier free!");
 			}
 			
-			Valuation myresult = dRealInterface.findInstance( myformula );
-			System.out.println("Result is: " + myresult.toString() );
+			dRealInterface dreal = new dRealInterface( 0.00001 );
+			Valuation myresult = dreal.findInstance( myformula );
+			if ( myresult != null ) {
+				System.out.println("Result is: " + myresult.toString() );
+			} else {
+				System.out.println("No instance found.");
+			}
 			
 		    } else {
 			throw new Exception("Input is not a logical formula");
