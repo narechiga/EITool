@@ -11,6 +11,7 @@ import java.util.*;
 public class dRealInterface  {
 
 	protected double precision;
+	boolean debug = true;
 
 	public dRealInterface( double precision ) {
 		this.precision = precision;
@@ -41,6 +42,11 @@ public class dRealInterface  {
 		} else {
 			result = dRealSays.valuation;
 		}
+
+		if( debug ) {
+			System.out.println("findInstance valuation: " +  result.toString() );
+		}
+
 
 		return result;
 
@@ -89,6 +95,9 @@ public class dRealInterface  {
 			String[] tokens = line.split("\\s+");
 
 			RealVariable variable = new RealVariable( tokens[0] );
+			if( debug ) {
+				System.out.println("(extractModel) found real variable: " + variable.toMathematicaString() );
+			}
 			String lowerBound = tokens[2].replace("[","").replace(",","").replace("(","").replace(";","");
 			String upperBound = tokens[3].replace("]","").replace(")","").replace(";","");
 
@@ -146,7 +155,7 @@ public class dRealInterface  {
 
 	}
 
-	public ComparisonFormula createBallFormula( Valuation center, Real radius ) throws Exception {
+	public ComparisonFormula createBallExclusionFormula( Valuation center, Real radius ) throws Exception {
 
 		ComparisonFormula ballFormula;
 
@@ -157,15 +166,16 @@ public class dRealInterface  {
 		RealVariable thisVar;
 		while ( varIterator.hasNext() ) {
 			thisVar = varIterator.next();
+			System.out.println("\tgenerating ball for variable: " + thisVar.toMathematicaString() );
 
 			if ( varIterator.hasNext() ) {
-				ballString = ballString + thisVar +  " + ";
+				ballString = ballString + thisVar.toMathematicaString() +  "^2 + ";
 			} else {
-				ballString = ballString + thisVar;
+				ballString = ballString + thisVar.toMathematicaString();
 			}
 		}
 
-		ballString = ballString + " < " + radius.toMathematicaString();
+		ballString = ballString + " > " + radius.toMathematicaString();
 
 		ballFormula = (ComparisonFormula)(dLFormula.parseFormula( ballString ));
 
@@ -196,14 +206,15 @@ public class dRealInterface  {
 		while ( success == false ) {
 			// Pick a parameter point
 			
-			System.out.println("Choosing a parameter valuation...")
+			System.out.println("Choosing a parameter valuation...");
+			System.out.println("Parameter sampling formula is: " + parameterSamplingFormula);
 			thisParameter = findInstance( parameterSamplingFormula );
 			
 			if ( thisParameter == null ) {
 				throw new Exception("No more parameters at this resolution!");
 			}
 			
-			System.out.println("Writing refinement query...")
+			System.out.println("Writing refinement query...");
 			// Try refinement verification
 			File refinementQuery = writeSingleRefinementVerificationQuery(
 					statevariables,
@@ -212,18 +223,17 @@ public class dRealInterface  {
 					invariant,
 					thisParameter,
 					controllaw );
-			System.out.println("Running refinement query...")
+			System.out.println("Running refinement query...");
 			SMTResult refinementResult = runQuery( refinementQuery );
-			if ( refinementQuery.equals("unsat") ) {
-				System.out.println("Refinement successful!")
+			if ( refinementResult.satisfiability.equals("unsat") ) {
+				System.out.println("Refinement successful!:" + refinementResult);
 				success = true;
 				witnessParameters = thisParameter;
 
 			} else { //update parameter formula to try a different point
-				System.out.println("Refinement not succesful, choosing a new parameter vector ")
-				parameterSamplingFormula = new AndFormula( parameterSamplingFormula, createBallFormula( thisParameter, new Real( resolution ) ) );
+				System.out.println("Refinement not succesful, choosing a new parameter vector; " + refinementResult);
+				parameterSamplingFormula = new AndFormula( parameterSamplingFormula, createBallExclusionFormula( thisParameter, new Real( resolution ) ) );
 			}
-
 		}
 
 
@@ -269,14 +279,21 @@ public class dRealInterface  {
 			refinementQuery = refinementQuery + "(declare-fun " + thisEIParameter.todRealString() + " () Real)\n";
 		}
 
+		refinementQuery = refinementQuery + "\n;; Assert the parameter valuation\n";
+		refinementQuery = refinementQuery + ";; " + robustparameters.toString() + "\n";
+		refinementQuery = refinementQuery + robustparameters.todRealString();
+
 		refinementQuery = refinementQuery + "\n;; Assert the invariant\n";
+		refinementQuery = refinementQuery + ";; " + invariant.toMathematicaString() + "\n";
 		refinementQuery = refinementQuery + "(assert " + invariant.todRealString() + " )\n";
 
 		refinementQuery = refinementQuery + "\n;; Assert the controllaw\n";
+		refinementQuery = refinementQuery + ";; " + controllaw.toMathematicaString() + "\n";
 		refinementQuery = refinementQuery + "(assert " + controllaw.todRealString() + " )\n";
 
 		refinementQuery = refinementQuery + "\n;; Assert the NEGATION of the envelope (remember how dReal works!)\n";
 		NotFormula negatedEnvelope = new NotFormula( envelope );
+		refinementQuery = refinementQuery + ";; " + negatedEnvelope.toMathematicaString() + "\n";
 		refinementQuery = refinementQuery + "(assert " + negatedEnvelope.todRealString() + " )\n";
 
 		refinementQuery = refinementQuery + "\n(check-sat)\n(exit)\n";

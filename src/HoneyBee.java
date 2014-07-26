@@ -37,6 +37,15 @@ class HoneyBee {
 											    hbParser.control
 											    );
 			    dRealInterface dreal = new dRealInterface( 0.00001 );
+			    dreal.parametricVerify(  
+						hbParser.statevariables,
+						hbParser.eiparameters,
+						hbParser.envelope,
+						hbParser.invariant,
+						hbParser.robustparameters,
+						hbParser.control,
+						0.1);
+			    				
 			    //dreal.writeSingleRefinementVerificationQuery(
 			    //    						  hbParser.statevariables,
 			    //    						  hbParser.eiparameters,
