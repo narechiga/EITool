@@ -1,9 +1,0 @@
-package honeybee.drealkit;
-
-import manticore.dl.*;
-
-public class SMTResult {
-    
-    boolean isSat = true; // The default is sat, since the point of using dReal is to ensure unsat
-    
-    
