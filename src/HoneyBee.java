@@ -37,14 +37,15 @@ class HoneyBee {
 											    hbParser.control
 											    );
 			    dRealInterface dreal = new dRealInterface( 0.00001 );
-			    dreal.parametricVerify(  
-						hbParser.statevariables,
-						hbParser.eiparameters,
-						hbParser.envelope,
-						hbParser.invariant,
-						hbParser.robustparameters,
-						hbParser.control,
-						0.1);
+			    Valuation witnessParameters = dreal.parametricVerify(  
+										hbParser.statevariables,
+										hbParser.eiparameters,
+										hbParser.envelope,
+										hbParser.invariant,
+										hbParser.robustparameters,
+										hbParser.control,
+										0.1);
+			    System.out.println("Witness parameters: " + witnessParameters.toString() );
 			    				
 			    //dreal.writeSingleRefinementVerificationQuery(
 			    //    						  hbParser.statevariables,
@@ -96,7 +97,6 @@ class HoneyBee {
                 YYParser myParser = new YYParser( myLexer );
                 myParser.parse();
 
-                System.out.println("buzz buzz");
                 if ( (myParser.parsedStructure instanceof dLFormula)  ) {
 		    System.out.println( "PARSED: " + myParser.parsedStructure.toKeYmaeraString() );
 		    

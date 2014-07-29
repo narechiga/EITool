@@ -185,13 +185,23 @@ public class dRealInterface  {
 			System.out.println("\tgenerating ball for variable: " + thisVar.toMathematicaString() );
 
 			if ( varIterator.hasNext() ) {
-				ballString = ballString + thisVar.toMathematicaString() +  "^2 + ";
+				ballString = ballString 
+						+ "( " +thisVar.toMathematicaString() 
+						+ " - " + center.get(thisVar).toMathematicaString()
+						+  " )^2 + ";
 			} else {
-				ballString = ballString + thisVar.toMathematicaString();
+				ballString = ballString 
+						+ "( " +thisVar.toMathematicaString() 
+						+ " - " + center.get(thisVar).toMathematicaString()
+						+  " )^2";
 			}
 		}
 
 		ballString = ballString + " > " + radius.toMathematicaString();
+
+		if( debug ) {
+			System.out.println("Ball string is: " + ballString);
+		}
 
 		ballFormula = (ComparisonFormula)(dLFormula.parseFormula( ballString ));
 
@@ -266,6 +276,7 @@ public class dRealInterface  {
 
 	}
 
+// 
 	public HashMap<dLFormula,Valuation> parametricVerifyByParts (
 			ArrayList<RealVariable> statevariables,
 			ArrayList<RealVariable> eiparameters,
@@ -274,11 +285,11 @@ public class dRealInterface  {
 			dLFormula robustparameters,
 			ConcreteAssignmentProgram controllaw,
 			double resolution ) throws Exception {
+				return new HashMap<dLFormula,Valuation>();
 			}
 
-	// Writes a single refinement verification query. The main reason this
-	// function is nice w.r.t. the simple query writing function is that it adds
-	// neat comments to point out the different portions
+// Writes a single refinement verification query. The main reason this function is nice w.r.t. the simple 
+// query writing function is that it adds neat comments to point out the different portions
 	protected File writeSingleRefinementVerificationQuery(
 			ArrayList<RealVariable> statevariables,
 			ArrayList<RealVariable> eiparameters,
@@ -308,10 +319,6 @@ public class dRealInterface  {
 						+ thisControlVariable.todRealString() + " () Real)\n";
 		}
 
-		System.out.println("INFO: drealkit requires robustparameter set to be a singleton" +
-					" (cannot evaluate Exists[ Forall[] ]  queries)");
-		System.out.println("INFO: Checking this is difficult, so you may get a very cryptic error"
-					+ " if this condition is not met");
 		Iterator<RealVariable> eiparameteriterator = eiparameters.iterator();
 		refinementQuery = refinementQuery + "\n;; Envelope-invariant parameter declaration\n";
 		RealVariable thisEIParameter;

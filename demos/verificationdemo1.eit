@@ -1,0 +1,31 @@
+
+/* Only slightly harder than demo zero, requires hunting for the right parameter value */
+
+\statevariables{
+	x1, x2
+}
+
+\eiparameters{
+	p1, p2
+}
+
+\envelope{
+	p1 + x1^3 + x2^2 + u >= 41.89
+}
+
+\invariant{
+	x1 >= 0
+}
+
+\robustparameters{
+	p1 > 0
+}
+
+\controllaw{
+	u := 0
+}
+
+
+
+
+
