@@ -1,0 +1,36 @@
+
+/* requires refinement by parts */
+/* SSA0 */
+
+\statevariables{
+	dsv
+}
+
+\eiparameters{
+	vmax
+}
+
+\envelope{
+	((vmax*0.1 + dsv <= 0) & (u = vmax)) | (u <= 0)
+}
+
+\invariant{
+	dsv <= 0
+}
+
+\robustparameters{
+	(0 <= vmax) & (vmax <= 65)
+}
+
+\domain{
+	-20 <= dsv & dsv <= 0
+}
+
+\controllaw{
+	u := -0.5*(dsv + 0.1)
+}
+
+
+
+
+

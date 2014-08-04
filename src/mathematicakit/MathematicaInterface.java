@@ -1,4 +1,4 @@
-package honeybee.mathematicakit;
+package perseus.mathematicakit;
 
 import java.util.*;
 import java.io.*;

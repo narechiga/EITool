@@ -2,11 +2,11 @@ import java.io.*;
 import java.util.*;
 
 import manticore.dl.*;
-import honeybee.mathematicakit.*;
-import honeybee.drealkit.*;
+import perseus.mathematicakit.*;
+import perseus.drealkit.*;
 
 
-class HoneyBee {
+class Perseus {
 
 	public static void main ( String [] args ) {
 
@@ -43,6 +43,7 @@ class HoneyBee {
 										hbParser.envelope,
 										hbParser.invariant,
 										hbParser.robustparameters,
+			        						hbParser.domain,
 										hbParser.control,
 										0.1);
 			    System.out.println("Witness parameters: " + witnessParameters.toString() );
@@ -83,7 +84,6 @@ class HoneyBee {
 	}
     
     public static void commandLine() {
-	
 	Scanner commandScanner = new Scanner( System.in );
 	while (true) {
 	    try {

@@ -1,4 +1,4 @@
-package honeybee.drealkit;
+package perseus.drealkit;
 
 import java.util.*;
 import java.io.*;
@@ -10,9 +10,22 @@ import java.util.*;
 
 public class dRealInterface  {
 
+	// COLORS! OMG COLORS!
+	public static final String ANSI_RESET = "\u001B[0m";
+	public static final String ANSI_BLACK = "\u001B[30m";
+	public static final String ANSI_RED = "\u001B[31m";
+	public static final String ANSI_GREEN = "\u001B[32m";
+	public static final String ANSI_YELLOW = "\u001B[33m";
+	public static final String ANSI_BLUE = "\u001B[34m";
+	public static final String ANSI_PURPLE = "\u001B[35m";
+	public static final String ANSI_CYAN = "\u001B[36m";
+	public static final String ANSI_WHITE = "\u001B[37m";
+	public static final String ANSI_BOLD = "\u001B[1m";
+
 	protected double precision;
 	boolean debug = true;
 
+//Constructors
 	// Constructor with specified precision
 	public dRealInterface( double precision ) {
 		this.precision = precision;
@@ -37,8 +50,10 @@ public class dRealInterface  {
 // the formula. This is delta-satisfy because dReal does delta-satisfaction and not true satisfaction
 	public Valuation findInstance ( dLFormula thisFormula ) throws Exception {
 		Valuation result;
+		ArrayList<dLFormula> theseFormulas = new ArrayList<dLFormula>();
+		theseFormulas.add( thisFormula );
+		File queryFile = writeQueryFile( theseFormulas );
 
-		File queryFile = writeQueryFile( thisFormula );
 		SMTResult dRealSays = runQuery( queryFile );
 
 		if ( dRealSays.satisfiability.equals("unsat") ) {
@@ -47,10 +62,22 @@ public class dRealInterface  {
 			result = dRealSays.valuation;
 		}
 
-		if( debug ) {
-			System.out.println("findInstance valuation: " +  result.toString() );
-		}
+		return result;
+	}
 
+// Takes an ArrayList of formulas, and uses dReal to produce a valuation that satisfies all of them
+// simultaneously
+	public Valuation findInstance ( ArrayList<dLFormula> theseFormulas ) throws Exception {
+		Valuation result;
+
+		File queryFile = writeQueryFile( theseFormulas );
+		SMTResult dRealSays = runQuery( queryFile );
+
+		if ( dRealSays.satisfiability.equals("unsat") ) {
+			result = null;
+		} else {
+			result = dRealSays.valuation;
+		}
 
 		return result;
 
@@ -86,6 +113,7 @@ public class dRealInterface  {
 			throw new Exception("dReal returned no output!");
 		}
 
+
 		return result;
 	}
 
@@ -103,10 +131,6 @@ public class dRealInterface  {
 			String[] tokens = line.split("\\s+");
 
 			RealVariable variable = new RealVariable( tokens[0] );
-			if( debug ) {
-				System.out.println("(extractModel) found real variable: " 
-							+ variable.toMathematicaString() );
-			}
 			String lowerBound = tokens[2].replace("[","").replace(",","").replace("(","").replace(";","");
 			String upperBound = tokens[3].replace("]","").replace(")","").replace(";","");
 
@@ -130,43 +154,67 @@ public class dRealInterface  {
 		return model;
 	}
 
-
 // Writes a query file for a logical formula.  Note that it does not negate the formula or anything, it just writes out
 // a satisfiability query for the formula that it is given
-	protected File writeQueryFile( dLFormula thisFormula ) throws Exception {
+	protected File writeQueryFile( ArrayList<dLFormula> theseFormulas ) throws Exception {
 		String queryString = "(set-logic QF_NRA)\n\n";
 
-		Iterator<RealVariable> variableIterator = thisFormula.getVariables().iterator();
+		
+		// First extract the list of all the variables that occur in any of the formulas
+		Iterator<dLFormula> formulaIterator = theseFormulas.iterator();
+		Set<RealVariable> variables = new HashSet<RealVariable>();
+		while ( formulaIterator.hasNext() ) {
+			variables.addAll( formulaIterator.next().getVariables() );
+		}
+
+		// Now print the variable declarations
 		queryString = queryString + "\n;; Variable declarations\n";
 		RealVariable thisVariable;
+		Iterator<RealVariable> variableIterator = variables.iterator();
 		while ( variableIterator.hasNext() ) {
 			queryString = queryString + "(declare-fun " + variableIterator.next() + " () Real )\n";
 		}
 
-		queryString = queryString + "\n;; Formula\n";
-		queryString = queryString + "(assert " + thisFormula.todRealString() + " )\n";
 
+		// Assert each formula
+		formulaIterator = theseFormulas.iterator();
+		dLFormula thisFormula;
+		while ( formulaIterator.hasNext() ) {
+			thisFormula = formulaIterator.next();
+			if( debug ) {
+				if ( thisFormula == null ) {
+					System.out.println("Got a null formula!");
+				} else {
+					System.out.println("Currently printing out formula: " + thisFormula.toMathematicaString() );
+				}
+			}
+
+			queryString = queryString + "\n;; Formula is (" + thisFormula.toMathematicaString() +")\n";
+			queryString = queryString + "(assert " + thisFormula.todRealString() + " )\n";
+
+		}
+
+		// Print the little thing that needs to go at the end
 		queryString = queryString + "\n(check-sat)\n(exit)\n";
 
-
+		// Now generate the actual file
 		File drealworkspacedir = new File("drealworkspace");
 		if (!drealworkspacedir.exists()) {
 			drealworkspacedir.mkdir();
 		}
-
 		double randomID = Math.round(Math.random());
 		Date date = new Date();
 		String filename = "drealworkspace/query." + date.getTime() + "." + randomID + ".smt2";
 		PrintWriter queryFile = new PrintWriter( filename );
-		queryFile.println(";; Automatically generated by HoneyBee on " + date.toString() + "\n");
-		queryFile.println(";; Assertion is " + thisFormula.toMathematicaString() + "\n\n");
+		queryFile.println(";; Automatically generated by Perseus on " + date.toString() + "\n");
 		queryFile.println( queryString );
 		queryFile.close();
-
+		if( debug ) {
+			System.out.println("Done writing file, writeQueryFile is returning");
+		}
 		return new File( filename );
 
 	}
-
 
 // Creates a formula that represents a ball at the given center with the given radius. 
 // Maybe the best approach is to actually create a separate class for balls, open and closed.
@@ -185,7 +233,7 @@ public class dRealInterface  {
 			System.out.println("\tgenerating ball for variable: " + thisVar.toMathematicaString() );
 
 			if ( varIterator.hasNext() ) {
-				ballString = ballString 
+				ballString = ballString
 						+ "( " +thisVar.toMathematicaString() 
 						+ " - " + center.get(thisVar).toMathematicaString()
 						+  " )^2 + ";
@@ -199,30 +247,40 @@ public class dRealInterface  {
 
 		ballString = ballString + " > " + radius.toMathematicaString();
 
-		if( debug ) {
-			System.out.println("Ball string is: " + ballString);
-		}
-
-		ballFormula = (ComparisonFormula)(dLFormula.parseFormula( ballString ));
+		ballFormula = (ComparisonFormula)(dLStructure.parseStructure( ballString ));
 
 		return ballFormula;
+	}
 
-		// TODO: finishme!
+// Check if the invariant robustly covers the domain
+	public boolean invariantRobustlyCoversDomain( dLFormula invariant, dLFormula domain ) throws Exception {
 
+		NotFormula negatedInvariant = new NotFormula( invariant );
+		ArrayList<dLFormula> formulas = new ArrayList<dLFormula>();
+		formulas.add( negatedInvariant );
+		formulas.add( domain );
 
+		if ( findInstance( formulas ) == null ) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 // Tries to verify the given control law by refinement.
-// 	1. Chooses a parameter point, then tries refinement. 
-// 	2. If it fails, it chooses a new parameter point, that is outside a ball of radius "resolution" 
+// 	1. Chooses a parameter point, 
+// 	2. Checks if the invariant with this parameter covers the domain
+// 	3. then tries refinement. 
+// 	4. If it fails, it chooses a new parameter point, that is outside a ball of radius "resolution" 
 // 	from the original point
-// 	3. Keeps doing this until it succeeds.
+// 	5. Keeps doing this until it succeeds.
 	public Valuation parametricVerify (
 			ArrayList<RealVariable> statevariables,
 			ArrayList<RealVariable> eiparameters,
 			dLFormula envelope,
 			dLFormula invariant,
 			dLFormula robustparameters,
+			dLFormula domain,
 			ConcreteAssignmentProgram controllaw,
 			double resolution ) throws Exception {
 
@@ -230,22 +288,33 @@ public class dRealInterface  {
 		boolean success = false;
 		dLFormula parameterSamplingFormula = robustparameters;
 		Valuation thisParameter;
-		// Pick  a parameter point, try refinement verification
-		// If it succeeds, return
-		// If it fails, try a different point
-		// continue until dreal returns no more points
+		
 		while ( success == false ) {
 			// Pick a parameter point
-			
-			System.out.println("Choosing a parameter valuation...");
-			System.out.println("Parameter sampling formula is: " + parameterSamplingFormula);
+			if ( debug ) {
+				System.out.println("Choosing a parameter valuation...");
+				System.out.println("Parameter sampling formula is: " + parameterSamplingFormula);
+			}
 			thisParameter = findInstance( parameterSamplingFormula );
+			dLFormula substitutedInvariant = invariant.substituteConcreteValuation( thisParameter );
 			
 			if ( thisParameter == null ) {
-				throw new Exception("No more parameters at this resolution!");
+				throw new Exception( ANSI_BOLD + ANSI_RED + "No more parameters at this resolution!" + ANSI_RESET);
 			}
-			
-			System.out.println("Writing refinement query...");
+
+			if( debug ) {
+				System.out.println("thisParameter is: " + thisParameter.toMathematicaString() );
+				System.out.println("substituted invariant is: " + substitutedInvariant.toMathematicaString() );
+			}
+
+			if ( !invariantRobustlyCoversDomain( substitutedInvariant, domain ) ) {
+				System.out.println( ANSI_BOLD + ANSI_YELLOW + "WARNING:" + ANSI_RESET 
+							+ " Invariant parametrization does not cover the domain robustly");
+			} else {
+				System.out.println( ANSI_BOLD + ANSI_CYAN + "INFO:" + ANSI_RESET 
+							+" Invariant parametrization covers domain robustly");
+			}
+
 			// Try refinement verification
 			File refinementQuery = writeSingleRefinementVerificationQuery(
 					statevariables,
@@ -254,7 +323,6 @@ public class dRealInterface  {
 					invariant,
 					thisParameter,
 					controllaw );
-			System.out.println("Running refinement query...");
 			SMTResult refinementResult = runQuery( refinementQuery );
 			if ( refinementResult.satisfiability.equals("unsat") ) {
 				System.out.println("Refinement successful!:" + refinementResult);
@@ -285,6 +353,9 @@ public class dRealInterface  {
 			dLFormula robustparameters,
 			ConcreteAssignmentProgram controllaw,
 			double resolution ) throws Exception {
+
+
+
 				return new HashMap<dLFormula,Valuation>();
 			}
 
@@ -301,6 +372,7 @@ public class dRealInterface  {
 
 		String refinementQuery = "(set-logic QF_NRA)\n\n";
 
+		// State variables
 		Iterator<RealVariable> stateVariableIterator = statevariables.iterator();
 		refinementQuery = refinementQuery + "\n;; State variable declaration\n";
 		RealVariable thisStateVariable;
@@ -310,7 +382,10 @@ public class dRealInterface  {
 						+ thisStateVariable.todRealString() + " () Real)\n";
 		}
 
-		Iterator<RealVariable> controlVariableIterator = controllaw.getVariables().iterator();
+		// Control variables
+		Set<RealVariable> controlVariables = controllaw.getVariables();
+		controlVariables.removeAll( statevariables ); controlVariables.removeAll( eiparameters );
+		Iterator<RealVariable> controlVariableIterator = controlVariables.iterator();
 		refinementQuery = refinementQuery + "\n;; Control variable declaration\n";
 		RealVariable thisControlVariable;
 		while ( controlVariableIterator.hasNext() ) {
@@ -319,6 +394,7 @@ public class dRealInterface  {
 						+ thisControlVariable.todRealString() + " () Real)\n";
 		}
 
+		// EIParameters
 		Iterator<RealVariable> eiparameteriterator = eiparameters.iterator();
 		refinementQuery = refinementQuery + "\n;; Envelope-invariant parameter declaration\n";
 		RealVariable thisEIParameter;
@@ -328,18 +404,22 @@ public class dRealInterface  {
 						+ thisEIParameter.todRealString() + " () Real)\n";
 		}
 
+		// Parameter valuation
 		refinementQuery = refinementQuery + "\n;; Assert the parameter valuation\n";
 		refinementQuery = refinementQuery + ";; " + robustparameters.toString() + "\n";
 		refinementQuery = refinementQuery + robustparameters.todRealString();
 
+		// Invariant
 		refinementQuery = refinementQuery + "\n;; Assert the invariant\n";
 		refinementQuery = refinementQuery + ";; " + invariant.toMathematicaString() + "\n";
 		refinementQuery = refinementQuery + "(assert " + invariant.todRealString() + " )\n";
 
+		// Control law
 		refinementQuery = refinementQuery + "\n;; Assert the controllaw\n";
 		refinementQuery = refinementQuery + ";; " + controllaw.toMathematicaString() + "\n";
 		refinementQuery = refinementQuery + "(assert " + controllaw.todRealString() + " )\n";
 
+		// Envelope
 		refinementQuery = refinementQuery + "\n;; Assert the NEGATION of the envelope "
 							+ "(remember how dReal works!)\n";
 		NotFormula negatedEnvelope = new NotFormula( envelope );
@@ -360,7 +440,7 @@ public class dRealInterface  {
 		}
 
 		PrintWriter queryFile = new PrintWriter(filename);
-		queryFile.println(";; Automatically generated by HoneyBee on " + date.toString() + "\n\n");
+		queryFile.println(";; Automatically generated by Perseus on " + date.toString() + "\n\n");
 		queryFile.println( refinementQuery );
 		queryFile.close();
 

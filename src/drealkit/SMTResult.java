@@ -1,4 +1,4 @@
-package honeybee.drealkit;
+package perseus.drealkit;
 
 import manticore.dl.*;
 

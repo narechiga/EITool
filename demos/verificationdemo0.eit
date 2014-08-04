@@ -19,6 +19,10 @@
 	p1 > 0
 }
 
+\domain{
+	x1 >= 1
+}
+
 \controllaw{
 	u := 0
 }
