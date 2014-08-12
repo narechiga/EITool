@@ -2,20 +2,29 @@ import java.io.*;
 import java.util.*;
 
 import manticore.dl.*;
+import perseus.util.*;
 import perseus.mathematicakit.*;
 import perseus.drealkit.*;
 
 
 class Perseus {
+	//
+	// COLORS! OMG COLORS!
+	public static final String ANSI_RESET = "\u001B[0m";
+	public static final String ANSI_BLACK = "\u001B[30m";
+	public static final String ANSI_RED = "\u001B[31m";
+	public static final String ANSI_GREEN = "\u001B[32m";
+	public static final String ANSI_YELLOW = "\u001B[33m";
+	public static final String ANSI_BLUE = "\u001B[34m";
+	public static final String ANSI_PURPLE = "\u001B[35m";
+	public static final String ANSI_CYAN = "\u001B[36m";
+	public static final String ANSI_WHITE = "\u001B[37m";
+	public static final String ANSI_BOLD = "\u001B[1m";
 
 	public static void main ( String [] args ) {
 
-		System.out.println("Hello world!");
-
 		if ( args.length == 1 ) {
 		    String filename = args[0];
-
-		    System.out.println("My argument is: " + filename);
 
 		    try {
 			Lexer hbLexer = new Lexer( new FileReader( args[0] ) );
@@ -36,17 +45,26 @@ class Perseus {
 											    hbParser.robustparameters,
 											    hbParser.control
 											    );
-			    dRealInterface dreal = new dRealInterface( 0.00001 );
-			    Valuation witnessParameters = dreal.parametricVerify(  
-										hbParser.statevariables,
-										hbParser.eiparameters,
-										hbParser.envelope,
-										hbParser.invariant,
-										hbParser.robustparameters,
-			        						hbParser.domain,
-										hbParser.control,
-										0.1);
-			    System.out.println("Witness parameters: " + witnessParameters.toString() );
+			    dRealInterface dR = new dRealInterface( 0.00001 );
+			//    Valuation witnessParameters = dreal.parametricVerify(  
+			//							hbParser.statevariables,
+			//							hbParser.eiparameters,
+			//							hbParser.envelope,
+			//							hbParser.invariant,
+			//							hbParser.robustparameters,
+			//        						hbParser.domain,
+			//							hbParser.control,
+			//							1);
+			    //System.out.println("Witness parameters: " + witnessParameters.toString() );
+			//    dR.parametricVerifyByParts(  
+			//				hbParser.statevariables,
+			//				hbParser.eiparameters,
+			//				hbParser.envelope,
+			//				hbParser.invariant,
+			//				hbParser.robustparameters,
+			//        			hbParser.domain,
+			//				hbParser.control,
+			//				0.1);
 			    				
 			    //dreal.writeSingleRefinementVerificationQuery(
 			    //    						  hbParser.statevariables,
@@ -83,72 +101,11 @@ class Perseus {
 
 	}
     
-    public static void commandLine() {
-	Scanner commandScanner = new Scanner( System.in );
-	while (true) {
-	    try {
-		System.out.print("\nfindinstance:> ");
-		String input = commandScanner.nextLine();
-		input = input.trim();
-		//		Scanner in = new Scanner( input );
-		
-                StringReader inreader = new StringReader( input );
-                Lexer myLexer = new Lexer( inreader );
-                YYParser myParser = new YYParser( myLexer );
-                myParser.parse();
-
-                if ( (myParser.parsedStructure instanceof dLFormula)  ) {
-		    System.out.println( "PARSED: " + myParser.parsedStructure.toKeYmaeraString() );
-		    
-		    if ( myParser.parsedStructure instanceof dLFormula) {
-			dLFormula myformula = (dLFormula)myParser.parsedStructure;
-			if ( !myformula.isStatic() ) {
-			    throw new Exception("Formula is not static!");
-			} if (!myformula.isQuantifierFree() ) {
-			    throw new Exception("Formula is not quantifier free!");
-			}
-			
-			dRealInterface dreal = new dRealInterface( 0.00001 );
-			Valuation myresult = dreal.findInstance( myformula );
-			if ( myresult != null ) {
-				System.out.println("Result is: " + myresult.toString() );
-			} else {
-				System.out.println("No instance found.");
-			}
-			
-		    } else {
-			throw new Exception("Input is not a logical formula");
-		    }
-
-                }
-
-    
-		// if ( in.hasNext("parse") ){
-		//     in.skip("parse");
-		//     runParser( in.nextLine() + "\n" );
-		// } else if ( in.hasNext("evaluate") ) { 
-		//     in.skip("evaluate");
-		//     runEvaluate( in.nextLine() + "\n");
-		// } else if ( in.hasNext("simulate") ) { 
-		//     in.skip("simulate");
-		//     runSimulate( in.nextLine() + "\n");
-		//     //} else if ( in.hasNext("execute") ) {
-		//     //      in.skip("execute");
-		//     //      runExecute( in.nextLine() + "\n");
-		// } else if ( in.hasNext("version") ) { 
-		//     System.out.println("Manticore version 0");
-		//     in.nextLine();
-		// } else {
-		//     runParser( in.nextLine() + "\n" );
-		// }
-
-	    } catch ( Exception e ) { 
-		System.out.println("Error running parser test loop.");
-		System.err.println( e );
-		e.printStackTrace();
-	    }
+	public static void commandLine() {
+		PerseusCommandLineInterface thisCommandline = new PerseusCommandLineInterface();
+		thisCommandline.run();
 	}
-    }
+
 
 
 }

@@ -1,0 +1,42 @@
+
+/* requires refinement by parts */
+/* SSA0 */
+
+\statevariables{
+	x
+}
+
+\eiparameters{
+	upper, lower
+}
+
+\envelope{
+	lower <= u & u <= upper
+}
+
+\invariant{
+	x^2 < 10
+}
+
+\robustparameters{
+	-10 <= lower & lower <= 10 
+	& -10 <= upper & upper <= 10
+	& 0.1 <= upper - lower & upper - lower <= 1
+}
+
+\domain{
+	x^2 <= 9
+}
+
+\controllaw{
+	u := x 
+}
+
+/*\settings{
+	resolution := 1;
+}*/
+
+
+
+
+

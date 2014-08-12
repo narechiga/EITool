@@ -4,8 +4,8 @@ import manticore.dl.*;
 
 public class SMTResult {
     
-    String satisfiability;
-    Valuation valuation;
+    public String satisfiability;
+    public Valuation valuation;
 
     public SMTResult( String satisfiability, Valuation valuation ) {
 	this.satisfiability = satisfiability;
