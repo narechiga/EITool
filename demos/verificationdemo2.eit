@@ -27,7 +27,7 @@
 }
 
 \controllaw{
-	u := -0.5*(dsv + 0.1)
+	u = -0.5*(dsv + 0.1)
 }
 
 /*\settings{

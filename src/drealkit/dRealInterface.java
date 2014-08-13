@@ -50,25 +50,40 @@ public class dRealInterface implements SolverInterface {
                 }
 	}
 
-// "Resolve" family of methods
-	public SolverResult resolve ( dLFormula thisFormula ) throws Exception {
-	    String comment = generateComment(thisFormula);
-	    String filename = decorateFilename( "resolve" );
+// "checkValidity" family of methods -- try to find a counterexample
+	public SolverResult checkValidity ( dLFormula thisFormula ) throws Exception {
+	    String comment = generateComment( new NotFormula(thisFormula) );
+	    String filename = decorateFilename( "checkValidity" );
 
-	    return resolve( filename, thisFormula, comment );
+	    return checkValidity( filename, thisFormula, comment );
 	}
 
-	public SolverResult resolve( String filename, dLFormula thisFormula, String comment ) throws Exception {
+	public SolverResult checkValidity( String filename, dLFormula thisFormula, String comment ) throws Exception {
 	    NotFormula negatedFormula = new NotFormula( thisFormula );
 	    ArrayList<dLFormula> theseFormulas = new ArrayList<dLFormula>();
 	    theseFormulas.add( negatedFormula );
-	    File queryFile = writeQueryFile( filename, theseFormulas, comment );
 
-	    return runQuery( queryFile );
+	    // Try to find a counterexample
+	    SolverResult subResult = findInstance( filename, theseFormulas, comment );
+
+	    // We queried the negation, so invert the result
+	    SolverResult result;
+	    if ( subResult.satisfiability.equals("unsat") ) {
+	    	    result = new SolverResult("sat", "valid", new Valuation() );
+	    } else if ( subResult.satisfiability.equals("delta-sat") ) { 
+			// The valuation is then a counterexample
+			// but with dReal we can't be sure
+	    	    result = new SolverResult("unknown", "unknown", subResult.valuation );
+	    } else {
+	    	    //gibberish, I guess
+	    	    result = new SolverResult("unknown", "unknown", new Valuation() );
+	    }
+
+	    return result;
 	}
 
 // "FindInstance" family of methods
-	public Valuation findInstance ( dLFormula thisFormula ) throws Exception {
+	public SolverResult findInstance ( dLFormula thisFormula ) throws Exception {
 		Valuation result;
 		ArrayList<dLFormula> theseFormulas = new ArrayList<dLFormula>();
 		theseFormulas.add( thisFormula );
@@ -76,7 +91,7 @@ public class dRealInterface implements SolverInterface {
 		return findInstance( theseFormulas );
 	}
 
-	public Valuation findInstance ( List<dLFormula> theseFormulas ) throws Exception {
+	public SolverResult findInstance ( List<dLFormula> theseFormulas ) throws Exception {
 
 		String filename = decorateFilename( "findInstance" );
 		String comment = generateComment( theseFormulas );
@@ -84,18 +99,10 @@ public class dRealInterface implements SolverInterface {
 		return findInstance( filename, theseFormulas, comment );
 	}
 
-	public Valuation findInstance( String filename, List<dLFormula> theseFormulas, String comment )
+	public SolverResult findInstance( String filename, List<dLFormula> theseFormulas, String comment )
 					throws Exception {
 		File queryFile = writeQueryFile( filename, theseFormulas, comment );
-		SolverResult dRealSays = runQuery( queryFile );
-		Valuation result;
-
-		if ( dRealSays.satisfiability.equals("unsat") ) {
-			result = null;
-		} else {
-			result = dRealSays.valuation;
-		}
-		return result;
+		return runQuery( queryFile );
 	}
 
 // Automatically comment a list of formulas
@@ -136,12 +143,12 @@ public class dRealInterface implements SolverInterface {
 		String line;
 		if ( (line = dRealSays.readLine()) != null ) {
 			if ( line.equals("unsat")) {
-				result = new SolverResult( "unsat", null );
+				result = new SolverResult( "unsat", "notvalid", new Valuation() );
 			} else if ( line.equals("sat") ) {
 				Valuation cex = extractModel( new File( queryFile.getAbsolutePath() + ".model") );
-				result = new SolverResult( "sat", cex );
+				result = new SolverResult( "delta-sat", "unknown", cex );
 			} else if ( line.equals("unknown") ) {
-				result = new SolverResult( "unknown", null );
+				result = new SolverResult( "unknown", "unknown", new Valuation() );
 			} else {
 				throw new Exception( line );
 			}

@@ -4,6 +4,7 @@ package perseus.core;
 import java.io.*;
 import java.util.*;
 import perseus.abstractions.*;
+import perseus.verification.*;
 
 public class PerseusCommandLineInterface {
 
@@ -19,10 +20,6 @@ public class PerseusCommandLineInterface {
 	public static final String ANSI_BOLD = "\u001B[1m";
 	
 	PerseusInterfaceCore thisInterface;
-
-	public PerseusCommandLineInterface() {
-		thisInterface = new PerseusInterfaceCore( new dRealInterface( 0.00001 ) );
-	}
 
 	public PerseusCommandLineInterface( PerseusInterfaceCore thisInterface ) {
 		this.thisInterface = thisInterface;

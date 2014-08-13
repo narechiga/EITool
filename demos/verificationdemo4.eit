@@ -29,7 +29,7 @@
 }
 
 \controllaw{
-	u := -0.5*(x + 0.1)
+	u = -0.5*(x + 0.1)
 }
 
 /*\settings{

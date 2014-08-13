@@ -6,7 +6,7 @@ import manticore.dl.*;
 import perseus.abstractions.*;
 
 /***/
-import perseus.verification;
+import perseus.verification.*;
 
 /* later, refine this from hephaestos InterfaceCore */
 public class PerseusInterfaceCore {
@@ -29,6 +29,8 @@ public class PerseusInterfaceCore {
 // Constructor
 	public PerseusInterfaceCore( SolverInterface solver ) {
 		this.solver = solver;
+		this.verifier = new RefinementVerifier( solver );
+			
 	}
 
 // Allow the user to propsoe a refinement by parts
@@ -85,7 +87,7 @@ public class PerseusInterfaceCore {
 			}
 		}
 
-		if ( !setARobustlyCoversSetB( overallInvariant, thisProblem.domain ) ) {
+		if ( !verifier.setARobustlyCoversSetB( overallInvariant, thisProblem.domain ) ) {
 			System.out.println( ANSI_BOLD + ANSI_YELLOW + "WARNING:" + ANSI_RESET 
 						+ " Invariant parametrization does not cover the domain robustly");
 		} else {
@@ -94,7 +96,7 @@ public class PerseusInterfaceCore {
 		}
 
 		// Then try refinement with the overall envelope and invariant
-		SolverResult refinementResult = singleRefinementVerificationQuery(
+		SolverResult refinementResult = verifier.singleRefinementVerificationQuery(
 				thisProblem.stateVariables,
 				overallEnvelope,
 				overallInvariant,
@@ -129,7 +131,7 @@ public class PerseusInterfaceCore {
 		dLFormula substitutedEnvelope = thisProblem.envelope.substituteConcreteValuation( parameters );
 		dLFormula substitutedInvariant = thisProblem.invariant.substituteConcreteValuation( parameters );
 
-		if ( !setARobustlyCoversSetB( substitutedInvariant, thisProblem.domain ) ) {
+		if ( !verifier.setARobustlyCoversSetB( substitutedInvariant, thisProblem.domain ) ) {
 			System.out.println( ANSI_BOLD + ANSI_YELLOW + "WARNING:" + ANSI_RESET 
 						+ " Invariant parametrization does not cover the domain robustly");
 		} else {
@@ -137,7 +139,7 @@ public class PerseusInterfaceCore {
 						+" Invariant parametrization covers domain robustly");
 		}
 
-		SolverResult result = singleRefinementVerificationQuery(
+		SolverResult result = verifier.singleRefinementVerificationQuery(
 									thisProblem.stateVariables,
 									substitutedEnvelope,
 									substitutedInvariant,
@@ -154,7 +156,9 @@ public class PerseusInterfaceCore {
 
 // Automatically search for refinement parameters
 	public boolean autoRefine( VerificationProblem thisProblem ) throws Exception {
-		Valuation witness = parametricVerify( thisProblem.stateVariables,
+
+
+		Valuation witness = verifier.parametricVerify( thisProblem.stateVariables,
 							thisProblem.eiParameters,
 							thisProblem.envelope,
 							thisProblem.invariant,
@@ -163,7 +167,7 @@ public class PerseusInterfaceCore {
 							thisProblem.control,
 							1.0 );
 
-		if ( witness == null ) {
+		if ( witness.isEmpty() ) {
 			return false;
 		} else {
 			return true;
@@ -173,7 +177,7 @@ public class PerseusInterfaceCore {
 	
 // Automatically try to refine by parts	
 	public void autoParts( VerificationProblem thisProblem ) throws Exception {
-		parametricVerifyByParts( thisProblem.stateVariables,
+		verifier.parametricVerifyByParts( thisProblem.stateVariables,
 					thisProblem.eiParameters,
 					thisProblem.envelope,
 					thisProblem.invariant,
@@ -231,9 +235,9 @@ public class PerseusInterfaceCore {
 				throw new Exception("Formula is not quantifier free!");
 			}
 		
-			Valuation myresult = solver.findInstance( myformula );
+			Valuation myresult = solver.findInstance( myformula ).valuation;
 
-			if ( myresult != null ) {
+			if ( !myresult.isEmpty() ) {
 				System.out.println("Instance is: " + myresult.toString() );
 			} else {
 				System.out.println("No instance found.");

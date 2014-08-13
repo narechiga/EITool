@@ -2,13 +2,26 @@ package perseus.verification;
 
 import manticore.dl.*;
 import perseus.abstractions.*;
+import java.util.*;
 
 public class RefinementVerifier{
+	// COLORS! OMG COLORS!
+	public final String ANSI_RESET = "\u001B[0m";
+	public final String ANSI_BLACK = "\u001B[30m";
+	public final String ANSI_RED = "\u001B[31m";
+	public final String ANSI_GREEN = "\u001B[32m";
+	public final String ANSI_YELLOW = "\u001B[33m";
+	public final String ANSI_BLUE = "\u001B[34m";
+	public final String ANSI_PURPLE = "\u001B[35m";
+	public final String ANSI_CYAN = "\u001B[36m";
+	public final String ANSI_WHITE = "\u001B[37m";
+	public final String ANSI_BOLD = "\u001B[1m";
 
 	SolverInterface solver;
+	boolean debug = false;
 
 // Constructor
-	public RefinementVerifer( SolverInterface solver ) {
+	public RefinementVerifier( SolverInterface solver ) {
 		this.solver = solver;
 	}
 
@@ -20,7 +33,7 @@ public class RefinementVerifier{
 			dLFormula invariant,
 			dLFormula robustparameters,
 			dLFormula domain,
-			ConcreteAssignmentProgram controllaw,
+			dLFormula controllaw,
 			double resolution ) throws Exception {
 
 		int numberOfParts = 1;
@@ -181,8 +194,8 @@ public class RefinementVerifier{
 		queryFormulas.add( thisSet );
 
 		for ( int i = 0; i < numberOfPoints; i++ ) {
-			thisPoint = solver.findInstance( queryFormulas );
-			if ( thisPoint != null ) {
+			thisPoint = solver.findInstance( queryFormulas ).valuation;
+			if ( thisPoint != null && !thisPoint.isEmpty() ) {
 				samplePoints.add( thisPoint );
 				queryFormulas.add( createBallExclusionFormula( thisPoint, new Real(suggestedRadius) ) );
 				//System.out.println("Iteration: " + i + ";  Ball Exclusion Formula: " +
@@ -207,86 +220,50 @@ public class RefinementVerifier{
 			dLFormula envelope,
 			dLFormula invariant,
 			Valuation robustparameters,
-			ConcreteAssignmentProgram controllaw ) throws Exception {
+			dLFormula controllaw ) throws Exception {
 
-
-		String refinementQuery = "(set-logic QF_NRA)\n\n";
+		String comment = "";
+		ArrayList<dLFormula> theseFormulas = new ArrayList<dLFormula>();
+		String filename = solver.decorateFilename("refinementQuery");
 
 		// State variables
 		Iterator<RealVariable> stateVariableIterator = statevariables.iterator();
-		refinementQuery = refinementQuery + "\n;; State variable declaration\n";
-		RealVariable thisStateVariable;
+		comment = comment + "\n;; State variables are\n;; ";
 		while ( stateVariableIterator.hasNext() ) {
-			thisStateVariable = stateVariableIterator.next();
-			refinementQuery = refinementQuery + "(declare-fun " 
-						+ thisStateVariable.todRealString() + " () Real)\n";
-		}
-
-		// Control variables
-		Set<RealVariable> controlVariables = controllaw.getVariables();
-		controlVariables.removeAll( statevariables ); //controlVariables.removeAll( eiparameters );
-		Iterator<RealVariable> controlVariableIterator = controlVariables.iterator();
-		refinementQuery = refinementQuery + "\n;; Control variable declaration\n";
-		RealVariable thisControlVariable;
-		while ( controlVariableIterator.hasNext() ) {
-			thisControlVariable = controlVariableIterator.next();
-			refinementQuery = refinementQuery + "(declare-fun " 
-						+ thisControlVariable.todRealString() + " () Real)\n";
+			comment = comment + stateVariableIterator.next().toMathematicaString();
 		}
 
 		// EIParameters
 		Iterator<RealVariable> eiparameteriterator = eiparameters.iterator();
-		refinementQuery = refinementQuery + "\n;; Envelope-invariant parameter declaration\n";
-		RealVariable thisEIParameter;
+		comment = comment + "\n;; EI Parameters are\n;; ";
 		while ( eiparameteriterator.hasNext() ) {
-			thisEIParameter = eiparameteriterator.next();
-			refinementQuery = refinementQuery + "(declare-fun " 
-						+ thisEIParameter.todRealString() + " () Real)\n";
+			comment = comment + eiparameteriterator.next().toMathematicaString();
 		}
-
-		// Parameter valuation
-		refinementQuery = refinementQuery + "\n;; Assert the parameter valuation\n";
-		refinementQuery = refinementQuery + "\n;; Choice of ei parameters is\n";
-		refinementQuery = refinementQuery + ";; " + robustparameters.toMathematicaString() + "\n";
-		refinementQuery = refinementQuery + robustparameters.todRealString();
+		// Control variables
+		Set<RealVariable> controlVariables = controllaw.getVariables();
+		controlVariables.removeAll( statevariables );
+		Iterator<RealVariable> controlVariableIterator = controlVariables.iterator();
+		comment = comment + "\n;; Control variables are\n;; ";
+		while ( controlVariableIterator.hasNext() ) {
+			comment = comment + controlVariableIterator.next().toMathematicaString();
+		}
 
 		// Invariant
-		refinementQuery = refinementQuery + "\n;; Assert the invariant\n";
-		refinementQuery = refinementQuery + ";; " + invariant.toMathematicaString() + "\n";
-		refinementQuery = refinementQuery + "(assert " + invariant.todRealString() + " )\n";
+		comment = comment + "\n;; Invariant is\n;; " + invariant.toMathematicaString();
+		theseFormulas.add( invariant );
 
 		// Control law
-		refinementQuery = refinementQuery + "\n;; Assert the controllaw\n";
-		refinementQuery = refinementQuery + ";; " + controllaw.toMathematicaString() + "\n";
-		refinementQuery = refinementQuery + "(assert " + controllaw.todRealString() + " )\n";
+		comment = comment + "\n;; Control law is\n;; " + controllaw.toMathematicaString();
+		theseFormulas.add( controllaw );
 
 		// Envelope
-		refinementQuery = refinementQuery + "\n;; Assert the NEGATION of the envelope "
-							+ "(remember how dReal works!)\n";
+		comment = comment + "\n;; Envelope is (note that we will assert its negation\n;; "
+				+ envelope.toMathematicaString();
 		NotFormula negatedEnvelope = new NotFormula( envelope );
-		refinementQuery = refinementQuery + ";; " + negatedEnvelope.toMathematicaString() + "\n";
-		refinementQuery = refinementQuery + "(assert " + negatedEnvelope.todRealString() + " )\n";
+		theseFormulas.add( negatedEnvelope );
 
-		refinementQuery = refinementQuery + "\n(check-sat)\n(exit)\n";
+		return solver.findInstance( filename, theseFormulas, comment );
 
-		// Write the actual file
-		double randomID = Math.round(Math.random());
-		Date date = new Date();
-		String filename = "drealworkspace/refinementVerificationQuery." 
-					+ date.getTime() + "." + randomID + ".smt2";
-
-		File drealworkspacedir = new File("drealworkspace");
-		if (!drealworkspacedir.exists()) {
-			drealworkspacedir.mkdir();
-		}
-
-		PrintWriter queryFile = new PrintWriter(filename);
-		queryFile.println(";; Automatically generated by Perseus on " + date.toString() + "\n\n");
-		queryFile.println( refinementQuery );
-		queryFile.close();
-
-
-		return solver.runQuery( new File( filename ) );
 	}
 
 
@@ -296,72 +273,44 @@ public class RefinementVerifier{
 			List<RealVariable> statevariables,
 			dLFormula envelope,
 			dLFormula invariant,
-			ConcreteAssignmentProgram controllaw ) throws Exception {
+			dLFormula controllaw ) throws Exception {
 
 
 		String comment = "";
-		ArrayList<dLFormula> theseFormulas;
-
-		String refinementQuery = "(set-logic QF_NRA)\n\n";
+		ArrayList<dLFormula> theseFormulas = new ArrayList<dLFormula>();
+		String filename = solver.decorateFilename("refinementQuery");
 
 		// State variables
 		Iterator<RealVariable> stateVariableIterator = statevariables.iterator();
-		refinementQuery = refinementQuery + "\n;; State variable declaration\n";
-		RealVariable thisStateVariable;
+		comment = comment + "\n;; State variables are\n;; ";
 		while ( stateVariableIterator.hasNext() ) {
-			thisStateVariable = stateVariableIterator.next();
-			refinementQuery = refinementQuery + "(declare-fun " 
-						+ thisStateVariable.todRealString() + " () Real)\n";
+			comment = comment + stateVariableIterator.next().toMathematicaString();
 		}
 
 		// Control variables
 		Set<RealVariable> controlVariables = controllaw.getVariables();
 		controlVariables.removeAll( statevariables );
 		Iterator<RealVariable> controlVariableIterator = controlVariables.iterator();
-		refinementQuery = refinementQuery + "\n;; Control variable declaration\n";
-		RealVariable thisControlVariable;
+		comment = comment + "\n;; Control variables are\n;; ";
 		while ( controlVariableIterator.hasNext() ) {
-			thisControlVariable = controlVariableIterator.next();
-			refinementQuery = refinementQuery + "(declare-fun " 
-						+ thisControlVariable.todRealString() + " () Real)\n";
+			comment = comment + controlVariableIterator.next().toMathematicaString();
 		}
 
 		// Invariant
-		refinementQuery = refinementQuery + "\n;; Assert the invariant\n";
-		refinementQuery = refinementQuery + ";; " + invariant.toMathematicaString() + "\n";
-		refinementQuery = refinementQuery + "(assert " + invariant.todRealString() + " )\n";
+		comment = comment + "\n;; Invariant is\n;; " + invariant.toMathematicaString();
+		theseFormulas.add( invariant );
 
 		// Control law
-		refinementQuery = refinementQuery + "\n;; Assert the controllaw\n";
-		refinementQuery = refinementQuery + ";; " + controllaw.toMathematicaString() + "\n";
-		refinementQuery = refinementQuery + "(assert " + controllaw.todRealString() + " )\n";
+		comment = comment + "\n;; Control law is\n;; " + controllaw.toMathematicaString();
+		theseFormulas.add( controllaw );
 
 		// Envelope
-		refinementQuery = refinementQuery + "\n;; Assert the NEGATION of the envelope "
-							+ "(remember how dReal works!)\n";
+		comment = comment + "\n;; Envelope is (note that we will assert its negation\n;; "
+				+ envelope.toMathematicaString();
 		NotFormula negatedEnvelope = new NotFormula( envelope );
-		refinementQuery = refinementQuery + ";; " + negatedEnvelope.toMathematicaString() + "\n";
-		refinementQuery = refinementQuery + "(assert " + negatedEnvelope.todRealString() + " )\n";
+		theseFormulas.add( negatedEnvelope );
 
-		refinementQuery = refinementQuery + "\n(check-sat)\n(exit)\n";
-
-		// Write the actual file
-		double randomID = Math.round(Math.random());
-		Date date = new Date();
-		String filename = "drealworkspace/refinementVerificationQuery." 
-					+ date.getTime() + "." + randomID + ".smt2";
-
-		File drealworkspacedir = new File("drealworkspace");
-		if (!drealworkspacedir.exists()) {
-			drealworkspacedir.mkdir();
-		}
-
-		PrintWriter queryFile = new PrintWriter(filename);
-		queryFile.println(";; Automatically generated by Perseus on " + date.toString() + "\n\n");
-		queryFile.println( refinementQuery );
-		queryFile.close();
-
-		return solver.runQuery( new File(filename) );
+		return solver.findInstance( filename, theseFormulas, comment );
 
 	}
 
@@ -374,7 +323,7 @@ public class RefinementVerifier{
 
 		formulas.add( setB );
 
-		if ( solver.findInstance( formulas ) == null ) {
+		if ( solver.findInstance( formulas ).satisfiability.equals("unsat") ) {
 			return true;
 		} else {
 			return false;
@@ -444,10 +393,11 @@ public class RefinementVerifier{
 			dLFormula invariant,
 			dLFormula robustparameters,
 			dLFormula domain,
-			ConcreteAssignmentProgram controllaw,
+			dLFormula controllaw,
 			double resolution ) throws Exception {
 
-		Valuation witnessParameters = null;
+		
+		Valuation witnessParameters = new Valuation();
 		boolean success = false;
 		dLFormula parameterSamplingFormula = robustparameters;
 		Valuation thisParameter;
@@ -458,9 +408,11 @@ public class RefinementVerifier{
 				System.out.println("Choosing a parameter valuation...");
 				System.out.println("Parameter sampling formula is: " + parameterSamplingFormula);
 			}
-			thisParameter = solver.findInstance( parameterSamplingFormula );
 			
-			if ( thisParameter == null ) {
+			thisParameter = solver.findInstance( parameterSamplingFormula ).valuation;
+
+			
+			if ( thisParameter.isEmpty() ) {
 				throw new Exception( ANSI_BOLD + ANSI_RED + "No more parameters at this resolution!" + ANSI_RESET);
 			}
 			System.out.println("Trying refinement with parameter valuation: " + thisParameter.toMathematicaString() );
@@ -503,7 +455,6 @@ public class RefinementVerifier{
 									new Real( resolution ) ) );
 			}
 		}
-
 
 		return witnessParameters;
 

@@ -37,14 +37,6 @@ class Perseus {
 			    System.out.println("The robust parameters are: " + hbParser.robustparameters.toKeYmaeraString() );
 			    System.out.println("The control law is: " + hbParser.control.toKeYmaeraString() );
 				
-			    MathematicaInterface.writeParametricRefinementVerificationQuery(
-											    hbParser.statevariables,
-											    hbParser.eiparameters,
-											    hbParser.envelope,
-											    hbParser.invariant,
-											    hbParser.robustparameters,
-											    hbParser.control
-											    );
 			    dRealInterface dR = new dRealInterface( 0.00001 );
 			//    Valuation witnessParameters = dreal.parametricVerify(  
 			//							hbParser.statevariables,
@@ -81,14 +73,6 @@ class Perseus {
 			    System.out.println("The robust parameters are: " + hbParser.robustparameters.toKeYmaeraString() );
 			    System.out.println("The control template is: " + hbParser.control.toKeYmaeraString() );
 				
-			    MathematicaInterface.writeParametricRefinementSynthesisQuery(
-											 hbParser.statevariables,
-											 hbParser.eiparameters,
-											 hbParser.envelope,
-											 hbParser.invariant,
-											 hbParser.robustparameters,
-											 hbParser.control
-											 );
 			}
 
 
@@ -102,7 +86,9 @@ class Perseus {
 	}
     
 	public static void commandLine() {
-		PerseusCommandLineInterface thisCommandline = new PerseusCommandLineInterface();
+		PerseusCommandLineInterface thisCommandline = 
+				new PerseusCommandLineInterface(
+					new PerseusInterfaceCore( new dRealInterface(0.00001)) );
 		thisCommandline.run();
 	}
 

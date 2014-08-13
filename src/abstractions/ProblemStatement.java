@@ -1,12 +1,13 @@
 package perseus.abstractions;
 
 import manticore.dl.*;
+import java.util.*;
 
 public abstract class ProblemStatement {
-	List<RealVariable> stateVariables;
-	List<RealVariable> eiParameters;
-	dLFormula envelope;
-	dLFormula invariant;
-	dLFormula robustParameters;
-	dLFormula domain;
+	public List<RealVariable> stateVariables;
+	public List<RealVariable> eiParameters;
+	public dLFormula envelope;
+	public dLFormula invariant;
+	public dLFormula robustParameters;
+	public dLFormula domain;
 }

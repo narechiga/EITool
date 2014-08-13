@@ -5,11 +5,11 @@ import manticore.dl.*;
 import java.util.*;
 
 public class VerificationProblem extends ProblemStatement {
-	ConcreteAssignmentProgram control;
+	public dLFormula control;
 
 	public VerificationProblem ( List<RealVariable> stateVariables, List<RealVariable> eiParameters, 
 					dLFormula envelope, dLFormula invariant, dLFormula robustParameters, 
-					dLFormula domain, ConcreteAssignmentProgram control ) {
+					dLFormula domain, dLFormula control ) {
 		this.stateVariables = stateVariables;
 		this.eiParameters = eiParameters;
 		this.envelope = envelope;

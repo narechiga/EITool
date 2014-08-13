@@ -8,7 +8,7 @@
 # Compile
 `cd src/manticoredlport; jflex Lexer.lex; bison YYParser.y`;
 `cd src/manticoredlport; ./GenerateNativeInterpretation`;
-`javac src/*.java src/manticoredlport/*.java src/mathematicakit/*.java src/drealkit/*.java src/core/*.java`;
+`javac src/*.java src/manticoredlport/*.java src/mathematicakit/*.java src/drealkit/*.java src/core/*.java src/abstractions/*.java src/verification/*.java`;
 
 # Organize
 `rm -rf bin`;
@@ -28,7 +28,7 @@
 	`mv src/drealkit/*.class bin/perseus/drealkit/`;
 	`mv src/core/*.class bin/perseus/core/`;
 	`mv src/abstractions/*.class bin/perseus/abstractions/`;
-	`mv src/verification/*.class bin/perseus/abstractions/`;
+	`mv src/verification/*.class bin/perseus/verification/`;
 
 
 
