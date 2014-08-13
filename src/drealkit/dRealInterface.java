@@ -1,12 +1,9 @@
 package perseus.drealkit;
 
+import perseus.abstractions.*;;
 import java.util.*;
 import java.io.*;
 import manticore.dl.*;
-import perseus.util.*;;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-import java.util.*;
 
 
 public class dRealInterface implements SolverInterface {

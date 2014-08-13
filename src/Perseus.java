@@ -2,7 +2,7 @@ import java.io.*;
 import java.util.*;
 
 import manticore.dl.*;
-import perseus.util.*;
+import perseus.core.*;
 import perseus.mathematicakit.*;
 import perseus.drealkit.*;
 

@@ -8,21 +8,27 @@
 # Compile
 `cd src/manticoredlport; jflex Lexer.lex; bison YYParser.y`;
 `cd src/manticoredlport; ./GenerateNativeInterpretation`;
-`javac src/*.java src/manticoredlport/*.java src/mathematicakit/*.java src/drealkit/*.java src/util/*.java`;
+`javac src/*.java src/manticoredlport/*.java src/mathematicakit/*.java src/drealkit/*.java src/core/*.java`;
 
 # Organize
 `rm -rf bin`;
-`mkdir bin; mkdir bin/manticore; mkdir bin/perseus; mkdir bin/perseus/util;`;
+`mkdir bin; mkdir bin/manticore; mkdir bin/perseus;`; 
 `mv src/*.class bin`;
 	# libs
 	`mkdir bin/manticore/dl`;
 	`mkdir bin/perseus/mathematicakit`;
 	`mkdir bin/perseus/drealkit`;
+	`mkdir bin/perseus/core;`;
+	`mkdir bin/perseus/abstractions;`;
+	`mkdir bin/perseus/verification;`;
+
 
 	`mv src/manticoredlport/*.class bin/manticore/dl`;
 	`mv src/mathematicakit/*.class bin/perseus/mathematicakit/`;
 	`mv src/drealkit/*.class bin/perseus/drealkit/`;
-	`mv src/util/*.class bin/perseus/util/`;
+	`mv src/core/*.class bin/perseus/core/`;
+	`mv src/abstractions/*.class bin/perseus/abstractions/`;
+	`mv src/verification/*.class bin/perseus/abstractions/`;
 
 
 

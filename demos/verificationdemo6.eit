@@ -15,7 +15,7 @@
 }
 
 \invariant{
-	x^2 < 10
+	x^2 < 1
 }
 
 \robustparameters{
@@ -25,7 +25,7 @@
 }
 
 \domain{
-	x^2 <= 9
+	x^2 <= 0.9
 }
 
 \controllaw{
