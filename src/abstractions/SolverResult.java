@@ -64,11 +64,6 @@ public class SolverResult {
 //								+ this.toString() );
 //	}
 
-	if ( satisfiability.equals("unsat") && !validity.equals("notvalid") ) {
-		throw new SolverResultIntegrityException("If formula is unsat, it can't be valid\n" 
-								+ this.toString() );
-
-	}
    }
 
 
