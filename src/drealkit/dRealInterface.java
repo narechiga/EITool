@@ -130,7 +130,7 @@ public class dRealInterface implements SolverInterface {
 
 // Runs dReal on a query file, written by some other function The point of this function is to allow code reuse of 
 // the piece that actually invokes dReal
-	public SolverResult runQuery( File queryFile ) throws Exception {
+	protected SolverResult runQuery( File queryFile ) throws Exception {
 		SolverResult result = null;
 
 		String precisionArgument = "--precision=" + precision;
@@ -160,7 +160,7 @@ public class dRealInterface implements SolverInterface {
 	}
 
 // Extracts a counterexample from a *.model file produced after running dReal
-	public Valuation extractModel( File modelFile ) throws Exception {
+	protected Valuation extractModel( File modelFile ) throws Exception {
 		Valuation model = new Valuation();
 
 		BufferedReader modelReader = new BufferedReader( new FileReader(modelFile) );
