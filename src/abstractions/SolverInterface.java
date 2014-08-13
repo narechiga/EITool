@@ -22,9 +22,4 @@ public interface SolverInterface {
 	public String decorateFilename( String base );
 	public String generateFilename();
 
-	// Retire these eventually
-	public SolverResult runQuery( File queryFile ) throws Exception;
-	public Valuation extractModel( File modelfile ) throws Exception;
-
-
 }
