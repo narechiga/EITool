@@ -22,12 +22,12 @@ public class PerseusInterfaceCore {
 	public static final String ANSI_WHITE = "\u001B[37m";
 	public static final String ANSI_BOLD = "\u001B[1m";
 
-	SolverInterface solver;
+	LogicSolverInterface solver;
 	RefinementVerifier verifier;
 	boolean debug = false;
 
 // Constructor
-	public PerseusInterfaceCore( SolverInterface solver ) {
+	public PerseusInterfaceCore( LogicSolverInterface solver ) {
 		this.solver = solver;
 		this.verifier = new RefinementVerifier( solver );
 			
@@ -96,7 +96,7 @@ public class PerseusInterfaceCore {
 		}
 
 		// Then try refinement with the overall envelope and invariant
-		SolverResult refinementResult = verifier.singleRefinementVerificationQuery(
+		LogicSolverResult refinementResult = verifier.singleRefinementVerificationQuery(
 				thisProblem.stateVariables,
 				overallEnvelope,
 				overallInvariant,
@@ -141,7 +141,7 @@ public class PerseusInterfaceCore {
 						+" Invariant parametrization covers domain robustly");
 		}
 
-		SolverResult refinementResult = verifier.singleRefinementVerificationQuery(
+		LogicSolverResult refinementResult = verifier.singleRefinementVerificationQuery(
 									thisProblem.stateVariables,
 									substitutedEnvelope,
 									substitutedInvariant,

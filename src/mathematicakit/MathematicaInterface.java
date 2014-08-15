@@ -6,7 +6,7 @@ import java.io.*;
 import manticore.dl.*;
 
 
-public class MathematicaInterface extends SolverInterface {
+public class MathematicaInterface extends LogicSolverInterface {
 
 // Constructor
 	public MathematicaInterface() {
@@ -19,9 +19,9 @@ public class MathematicaInterface extends SolverInterface {
 	}
 
 // Basic way to do "quantifier elimination"
-	public SolverResult checkValidity( String filename, dLFormula thisFormula, String comment ) throws Exception {
+	public LogicSolverResult checkValidity( String filename, dLFormula thisFormula, String comment ) throws Exception {
 
-		SolverResult result = new SolverResult("unknown", "unknown", new Valuation() );
+		LogicSolverResult result = new LogicSolverResult("unknown", "unknown", new Valuation() );
 
 		String variableString = thisFormula.getVariables().toString();
 		variableString = variableString.replace("[", "{").replace("]", "}");
@@ -50,11 +50,11 @@ public class MathematicaInterface extends SolverInterface {
 		thisParser.parse();
 			
 		if ( thisParser.parsedStructure instanceof TrueFormula ){
-		        result = new SolverResult("sat", "valid", new Valuation() );
+		        result = new LogicSolverResult("sat", "valid", new Valuation() );
 		} else if ( thisParser.parsedStructure instanceof FalseFormula ) { 
-		        result = new SolverResult("unsat", "notvalid", new Valuation() );
+		        result = new LogicSolverResult("unsat", "notvalid", new Valuation() );
 		} else if ( thisParser.parsedStructure instanceof dLFormula ) {
-			result = new SolverResult("sat", "notvalid", new Valuation() );
+			result = new LogicSolverResult("sat", "notvalid", new Valuation() );
 		} else {
 			throw new Exception("Mathematica checkValidity is confused by " 
 						+ thisParser.parsedStructure.toString() );
@@ -65,10 +65,10 @@ public class MathematicaInterface extends SolverInterface {
 	}
 	 
 // Basic way to find an instance
-	public SolverResult findInstance( String filename, List<dLFormula> theseFormulas, String comment ) 
+	public LogicSolverResult findInstance( String filename, List<dLFormula> theseFormulas, String comment ) 
 				throws Exception {
 
-		SolverResult result = new SolverResult("unknown", "unknown", new Valuation() );
+		LogicSolverResult result = new LogicSolverResult("unknown", "unknown", new Valuation() );
 
 		Iterator<dLFormula> formulaIterator = theseFormulas.iterator();
 		dLFormula totalFormula = formulaIterator.next();
@@ -103,7 +103,7 @@ public class MathematicaInterface extends SolverInterface {
 		thisParser.parse();
 			
 		if ( thisParser.valuation != null ){
-		        result = new SolverResult("sat", "unknown", thisParser.valuation );
+		        result = new LogicSolverResult("sat", "unknown", thisParser.valuation );
 		} 
 		// else we don't know anything, and just return the result that knows nothing, already initialized
 

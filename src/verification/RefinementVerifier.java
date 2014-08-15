@@ -17,11 +17,11 @@ public class RefinementVerifier{
 	public final String ANSI_WHITE = "\u001B[37m";
 	public final String ANSI_BOLD = "\u001B[1m";
 
-	SolverInterface solver;
+	LogicSolverInterface solver;
 	boolean debug = false;
 
 // Constructor
-	public RefinementVerifier( SolverInterface solver ) {
+	public RefinementVerifier( LogicSolverInterface solver ) {
 		this.solver = solver;
 	}
 
@@ -88,7 +88,7 @@ public class RefinementVerifier{
 				robustDomainCoverage = true;
 			}
 			// Then try refinement with the overall envelope and invariant
-			SolverResult refinementResult = singleRefinementVerificationQuery(
+			LogicSolverResult refinementResult = singleRefinementVerificationQuery(
 					statevariables,
 					overallEnvelope,
 					overallInvariant,
@@ -214,7 +214,7 @@ public class RefinementVerifier{
 // Writes a single refinement verification query. The main reason this function is nice w.r.t. the simple 
 // query writing function is that it adds neat comments to point out the different portions
 // TAINTED
-	public SolverResult singleRefinementVerificationQuery(
+	public LogicSolverResult singleRefinementVerificationQuery(
 			List<RealVariable> statevariables,
 			List<RealVariable> eiparameters,
 			dLFormula envelope,
@@ -273,7 +273,7 @@ public class RefinementVerifier{
 
 // *** assorted helper functions and the like
 // Writes a single refinement verification query file, but with no ei parameters--assume they have been substituted
-	public SolverResult singleRefinementVerificationQuery(
+	public LogicSolverResult singleRefinementVerificationQuery(
 			List<RealVariable> statevariables,
 			dLFormula envelope,
 			dLFormula invariant,
@@ -438,7 +438,7 @@ public class RefinementVerifier{
 			}
 
 			// Try refinement verification
-			SolverResult refinementResult = singleRefinementVerificationQuery(
+			LogicSolverResult refinementResult = singleRefinementVerificationQuery(
 					statevariables,
 					eiparameters,
 					envelope,

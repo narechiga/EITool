@@ -6,7 +6,7 @@ import java.io.*;
 import manticore.dl.*;
 
 
-public class dRealInterface extends SolverInterface {
+public class dRealInterface extends LogicSolverInterface {
 
 	// COLORS! OMG COLORS!
 	public final String ANSI_RESET = "\u001B[0m";
@@ -51,32 +51,32 @@ public class dRealInterface extends SolverInterface {
 	}
 
 // "checkValidity" family of methods -- try to find a counterexample
-	public SolverResult checkValidity( String filename, dLFormula thisFormula, String comment ) throws Exception {
+	public LogicSolverResult checkValidity( String filename, dLFormula thisFormula, String comment ) throws Exception {
 		
 		dLFormula negatedFormula = thisFormula.negate();
 		ArrayList<dLFormula> theseFormulas = negatedFormula.splitOnAnds();
 
 		// Try to find a counterexample
-		SolverResult subResult = findInstance( filename, theseFormulas, comment );
+		LogicSolverResult subResult = findInstance( filename, theseFormulas, comment );
 		
 		// We queried the negation, so invert the result
-		SolverResult result;
+		LogicSolverResult result;
 		if ( subResult.satisfiability.equals("unsat") ) {
-			result = new SolverResult("sat", "valid", new Valuation() );
+			result = new LogicSolverResult("sat", "valid", new Valuation() );
 		} else if ( subResult.satisfiability.equals("delta-sat") ) { 
 			// The valuation is then a counterexample
 			// but with dReal we can't be sure
-			result = new SolverResult("unknown", "unknown", subResult.valuation );
+			result = new LogicSolverResult("unknown", "unknown", subResult.valuation );
 		} else {
 			//gibberish, I guess
-			result = new SolverResult("unknown", "unknown", new Valuation() );
+			result = new LogicSolverResult("unknown", "unknown", new Valuation() );
 		}
 		
 		return result;
 	}
 
 // "FindInstance" family of methods
-	public SolverResult findInstance( String filename, List<dLFormula> theseFormulas, String comment )
+	public LogicSolverResult findInstance( String filename, List<dLFormula> theseFormulas, String comment )
 					throws Exception {
 		File queryFile = writeQueryFile( filename, theseFormulas, comment );
 		return runQuery( queryFile );
@@ -124,8 +124,8 @@ public class dRealInterface extends SolverInterface {
 
 // Runs dReal on a query file, written by some other function The point of this function is to allow code reuse of 
 // the piece that actually invokes dReal
-	protected SolverResult runQuery( File queryFile ) throws Exception {
-		SolverResult result = null;
+	protected LogicSolverResult runQuery( File queryFile ) throws Exception {
+		LogicSolverResult result = null;
 
 		String precisionArgument = "--precision=" + precision;
 		ProcessBuilder queryPB = new ProcessBuilder("dReal", "--model", 
@@ -137,12 +137,12 @@ public class dRealInterface extends SolverInterface {
 		String line;
 		if ( (line = dRealSays.readLine()) != null ) {
 			if ( line.equals("unsat")) {
-				result = new SolverResult( "unsat", "notvalid", new Valuation() );
+				result = new LogicSolverResult( "unsat", "notvalid", new Valuation() );
 			} else if ( line.equals("sat") ) {
 				Valuation cex = extractModel( new File( queryFile.getAbsolutePath() + ".model") );
-				result = new SolverResult( "delta-sat", "unknown", cex );
+				result = new LogicSolverResult( "delta-sat", "unknown", cex );
 			} else if ( line.equals("unknown") ) {
-				result = new SolverResult( "unknown", "unknown", new Valuation() );
+				result = new LogicSolverResult( "unknown", "unknown", new Valuation() );
 			} else {
 				throw new Exception( line );
 			}
