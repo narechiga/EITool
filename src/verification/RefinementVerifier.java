@@ -230,14 +230,14 @@ public class RefinementVerifier{
 		Iterator<RealVariable> stateVariableIterator = statevariables.iterator();
 		comment = comment + "\n;; State variables are\n;; ";
 		while ( stateVariableIterator.hasNext() ) {
-			comment = comment + stateVariableIterator.next().toMathematicaString();
+			comment = comment + " " + stateVariableIterator.next().toMathematicaString();
 		}
 
 		// EIParameters
 		Iterator<RealVariable> eiparameteriterator = eiparameters.iterator();
 		comment = comment + "\n;; EI Parameters are\n;; ";
 		while ( eiparameteriterator.hasNext() ) {
-			comment = comment + eiparameteriterator.next().toMathematicaString();
+			comment = comment + " " + eiparameteriterator.next().toMathematicaString();
 		}
 		// Control variables
 		Set<RealVariable> controlVariables = controllaw.getVariables();
@@ -245,24 +245,26 @@ public class RefinementVerifier{
 		Iterator<RealVariable> controlVariableIterator = controlVariables.iterator();
 		comment = comment + "\n;; Control variables are\n;; ";
 		while ( controlVariableIterator.hasNext() ) {
-			comment = comment + controlVariableIterator.next().toMathematicaString();
+			comment = comment + " " + controlVariableIterator.next().toMathematicaString();
 		}
 
 		// Invariant
 		comment = comment + "\n;; Invariant is\n;; " + invariant.toMathematicaString();
-		theseFormulas.add( invariant );
 
 		// Control law
 		comment = comment + "\n;; Control law is\n;; " + controllaw.toMathematicaString();
-		theseFormulas.add( controllaw );
 
 		// Envelope
 		comment = comment + "\n;; Envelope is (note that we will assert its negation\n;; "
 				+ envelope.toMathematicaString();
-		NotFormula negatedEnvelope = new NotFormula( envelope );
-		theseFormulas.add( negatedEnvelope );
 
-		return solver.findInstance( filename, theseFormulas, comment );
+		AndFormula invariantAndControl = new AndFormula( invariant.substituteConcreteValuation( robustparameters), 
+								controllaw );
+		ImpliesFormula invariantAndControlImpliesEnvelope = new ImpliesFormula(
+					invariantAndControl, envelope.substituteConcreteValuation( robustparameters ) );
+
+		return solver.checkValidity( filename, invariantAndControlImpliesEnvelope, comment );
+
 
 	}
 
@@ -277,7 +279,6 @@ public class RefinementVerifier{
 
 
 		String comment = "";
-		ArrayList<dLFormula> theseFormulas = new ArrayList<dLFormula>();
 		String filename = solver.decorateFilename("refinementQuery");
 
 		// State variables
@@ -298,32 +299,33 @@ public class RefinementVerifier{
 
 		// Invariant
 		comment = comment + "\n;; Invariant is\n;; " + invariant.toMathematicaString();
-		theseFormulas.add( invariant );
 
 		// Control law
 		comment = comment + "\n;; Control law is\n;; " + controllaw.toMathematicaString();
-		theseFormulas.add( controllaw );
 
 		// Envelope
 		comment = comment + "\n;; Envelope is (note that we will assert its negation\n;; "
 				+ envelope.toMathematicaString();
-		NotFormula negatedEnvelope = new NotFormula( envelope );
-		theseFormulas.add( negatedEnvelope );
 
-		return solver.findInstance( filename, theseFormulas, comment );
+		AndFormula invariantAndControl = new AndFormula( invariant, controllaw );
+		ImpliesFormula invariantAndControlImpliesEnvelope = new ImpliesFormula(
+					invariantAndControl, envelope );
+
+		return solver.checkValidity( filename, invariantAndControlImpliesEnvelope, comment );
 
 	}
 
 // Check if the invariant robustly covers the domain
 	public boolean setARobustlyCoversSetB( dLFormula setA, dLFormula setB ) throws Exception {
 
-		NotFormula negatedSetA = new NotFormula( setA );
-		dLFormula simplifiedSetA = negatedSetA.pushNegation();
-		ArrayList<dLFormula> formulas = splitOnAnds( simplifiedSetA );
+		//NotFormula negatedSetA = new NotFormula( setA );
+		//dLFormula simplifiedSetA = negatedSetA.pushNegation();
+		//ArrayList<dLFormula> formulas = splitOnAnds( simplifiedSetA );
 
-		formulas.add( setB );
+		//formulas.add( setB );
+		ImpliesFormula BimpliesA = new ImpliesFormula( setB, setA );
 
-		if ( solver.findInstance( formulas ).satisfiability.equals("unsat") ) {
+		if ( solver.checkValidity( BimpliesA ).validity.equals("valid") ) {
 			return true;
 		} else {
 			return false;
@@ -366,18 +368,18 @@ public class RefinementVerifier{
 	}
 
 // A utility formula
-	public ArrayList<dLFormula> splitOnAnds ( dLFormula thisFormula ) {
-		ArrayList<dLFormula> subFormulas = new ArrayList<dLFormula>();
-
-		if ( !(thisFormula instanceof AndFormula ) ) {
-			subFormulas.add( thisFormula );
-		} else {
-			subFormulas.addAll( splitOnAnds( ((AndFormula)thisFormula).getLHS() ) );
-			subFormulas.addAll( splitOnAnds( ((AndFormula)thisFormula).getRHS() ) );
-		}
-
-		return subFormulas;
-	}
+//	public ArrayList<dLFormula> splitOnAnds ( dLFormula thisFormula ) {
+//		ArrayList<dLFormula> subFormulas = new ArrayList<dLFormula>();
+//
+//		if ( !(thisFormula instanceof AndFormula ) ) {
+//			subFormulas.add( thisFormula );
+//		} else {
+//			subFormulas.addAll( splitOnAnds( ((AndFormula)thisFormula).getLHS() ) );
+//			subFormulas.addAll( splitOnAnds( ((AndFormula)thisFormula).getRHS() ) );
+//		}
+//
+//		return subFormulas;
+//	}
 
 // Tries to verify the given control law by refinement.
 // 	1. Chooses a parameter point, 
@@ -413,9 +415,11 @@ public class RefinementVerifier{
 
 			
 			if ( thisParameter.isEmpty() ) {
-				throw new Exception( ANSI_BOLD + ANSI_RED + "No more parameters at this resolution!" + ANSI_RESET);
+				throw new Exception( ANSI_BOLD + ANSI_RED + "No more parameters at this resolution!" 
+										+ ANSI_RESET);
 			}
-			System.out.println("Trying refinement with parameter valuation: " + thisParameter.toMathematicaString() );
+			System.out.println("Trying refinement with parameter valuation: " 
+							+ thisParameter.toMathematicaString() );
 			dLFormula substitutedInvariant = invariant.substituteConcreteValuation( thisParameter );
 
 			if( debug ) {
@@ -439,7 +443,7 @@ public class RefinementVerifier{
 					invariant,
 					thisParameter,
 					controllaw );
-			if ( refinementResult.satisfiability.equals("unsat") ) {
+			if ( refinementResult.validity.equals("valid") ) {
 				System.out.println( ANSI_BOLD + ANSI_GREEN + "Refinement successful!" + ANSI_RESET);
 				success = true;
 				witnessParameters = thisParameter;

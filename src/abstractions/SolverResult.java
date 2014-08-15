@@ -19,6 +19,7 @@ public class SolverResult {
 
     public String toString() {
     	    return "(Solver result:\n\tsatisfiability: " + satisfiability 
+    	    		+ "\n\tvalidity: " + validity
     	    		+ "\n\tvaluation: " 
     	    		+ valuation.toString() +"\n)\n";
     }

@@ -101,7 +101,9 @@ public class PerseusInterfaceCore {
 				overallEnvelope,
 				overallInvariant,
 				thisProblem.control );
-		if ( refinementResult.satisfiability.equals("unsat") ) {
+		System.out.println("Refinement result is: " + refinementResult.toString() );
+		
+		if ( refinementResult.validity.equals("valid") ) {
 			System.out.println( ANSI_BOLD + ANSI_GREEN + "Refinement successful!" + ANSI_RESET);
 			return true;
 
@@ -139,23 +141,29 @@ public class PerseusInterfaceCore {
 						+" Invariant parametrization covers domain robustly");
 		}
 
-		SolverResult result = verifier.singleRefinementVerificationQuery(
+		SolverResult refinementResult = verifier.singleRefinementVerificationQuery(
 									thisProblem.stateVariables,
 									substitutedEnvelope,
 									substitutedInvariant,
 									thisProblem.control
 									);
 
-		if ( result.satisfiability.equals("unsat") ) {
+		System.out.println("Refinement result is: " + refinementResult.toString() );
+		if ( refinementResult.validity.equals("valid") ) {
 			return true;
 		} else {
-			System.out.println("delta-counterexample is: " + result.valuation.toMathematicaString() );
+			System.out.println("delta-counterexample is: " 
+				+ refinementResult.valuation.toMathematicaString() );
 			return false;
 		}
 	}
 
 // Automatically search for refinement parameters
 	public boolean autoRefine( VerificationProblem thisProblem ) throws Exception {
+		if( verifier == null ) {
+			System.out.println("I don't have a verifier!");
+		}
+
 
 
 		Valuation witness = verifier.parametricVerify( thisProblem.stateVariables,
