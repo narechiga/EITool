@@ -93,7 +93,7 @@ public class RefinementVerifier{
 					overallEnvelope,
 					overallInvariant,
 					controllaw );
-			if ( refinementResult.satisfiability.equals("unsat") ) {
+			if ( refinementResult.validity.equals("valid") ) {
 				System.out.println( ANSI_BOLD + ANSI_GREEN + "Refinement successful!" + ANSI_RESET); 
 				success = true;
 
@@ -228,35 +228,37 @@ public class RefinementVerifier{
 
 		// State variables
 		Iterator<RealVariable> stateVariableIterator = statevariables.iterator();
-		comment = comment + "\n;; State variables are\n;; ";
+		comment = comment + solver.commentLine("State variables are");
 		while ( stateVariableIterator.hasNext() ) {
-			comment = comment + " " + stateVariableIterator.next().toMathematicaString();
+			comment = comment + solver.commentLine(stateVariableIterator.next().toMathematicaString());
 		}
 
 		// EIParameters
 		Iterator<RealVariable> eiparameteriterator = eiparameters.iterator();
-		comment = comment + "\n;; EI Parameters are\n;; ";
+		comment = comment + "\n" + solver.commentLine("EI Parameters are");
 		while ( eiparameteriterator.hasNext() ) {
-			comment = comment + " " + eiparameteriterator.next().toMathematicaString();
+			comment = comment + solver.commentLine(eiparameteriterator.next().toMathematicaString());
 		}
 		// Control variables
 		Set<RealVariable> controlVariables = controllaw.getVariables();
 		controlVariables.removeAll( statevariables );
 		Iterator<RealVariable> controlVariableIterator = controlVariables.iterator();
-		comment = comment + "\n;; Control variables are\n;; ";
+		comment = comment + "\n" + solver.commentLine("Control variables are");
 		while ( controlVariableIterator.hasNext() ) {
-			comment = comment + " " + controlVariableIterator.next().toMathematicaString();
+			comment = comment + solver.commentLine(controlVariableIterator.next().toMathematicaString());
 		}
 
 		// Invariant
-		comment = comment + "\n;; Invariant is\n;; " + invariant.toMathematicaString();
+		comment = comment + "\n" + solver.commentLine("Invariant is: ") 
+					+ solver.commentLine(invariant.toMathematicaString());
 
 		// Control law
-		comment = comment + "\n;; Control law is\n;; " + controllaw.toMathematicaString();
+		comment = comment + "\n" + solver.commentLine("Control law is: ")
+					+ solver.commentLine(controllaw.toMathematicaString());
 
 		// Envelope
-		comment = comment + "\n;; Envelope is (note that we will assert its negation\n;; "
-				+ envelope.toMathematicaString();
+		comment = comment + "\n" + solver.commentLine("Envelope is (note that we will assert its negation): "
+				+ envelope.toMathematicaString());
 
 		AndFormula invariantAndControl = new AndFormula( invariant.substituteConcreteValuation( robustparameters), 
 								controllaw );
@@ -283,29 +285,29 @@ public class RefinementVerifier{
 
 		// State variables
 		Iterator<RealVariable> stateVariableIterator = statevariables.iterator();
-		comment = comment + "\n;; State variables are\n;; ";
+		comment = comment + solver.commentLine("State variables are");
 		while ( stateVariableIterator.hasNext() ) {
-			comment = comment + stateVariableIterator.next().toMathematicaString();
+			comment = comment + solver.commentLine(stateVariableIterator.next().toMathematicaString());
 		}
 
 		// Control variables
 		Set<RealVariable> controlVariables = controllaw.getVariables();
 		controlVariables.removeAll( statevariables );
 		Iterator<RealVariable> controlVariableIterator = controlVariables.iterator();
-		comment = comment + "\n;; Control variables are\n;; ";
+		comment = comment + solver.commentLine("Control variables are");
 		while ( controlVariableIterator.hasNext() ) {
-			comment = comment + controlVariableIterator.next().toMathematicaString();
+			comment = comment + solver.commentLine(controlVariableIterator.next().toMathematicaString());
 		}
 
 		// Invariant
-		comment = comment + "\n;; Invariant is\n;; " + invariant.toMathematicaString();
+		comment = comment + solver.commentLine("Invariant is") + solver.commentLine(invariant.toMathematicaString());
 
 		// Control law
-		comment = comment + "\n;; Control law is\n;; " + controllaw.toMathematicaString();
+		comment = comment + solver.commentLine("Control law is") + solver.commentLine(controllaw.toMathematicaString());
 
 		// Envelope
-		comment = comment + "\n;; Envelope is (note that we will assert its negation\n;; "
-				+ envelope.toMathematicaString();
+		comment = comment + solver.commentLine("Envelope is")
+				+ solver.commentLine(envelope.toMathematicaString());
 
 		AndFormula invariantAndControl = new AndFormula( invariant, controllaw );
 		ImpliesFormula invariantAndControlImpliesEnvelope = new ImpliesFormula(

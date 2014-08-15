@@ -34,7 +34,8 @@ class Perseus {
 			if ( !hbParser.synthesis ) {
 			    System.out.println("The control envelope is: " + hbParser.envelope.toKeYmaeraString() );
 			    System.out.println("The invariant is: " + hbParser.invariant.toKeYmaeraString() );
-			    System.out.println("The robust parameters are: " + hbParser.robustparameters.toKeYmaeraString() );
+			    System.out.println("The robust parameters are: " 
+			    			+ hbParser.robustparameters.toKeYmaeraString() );
 			    System.out.println("The control law is: " + hbParser.control.toKeYmaeraString() );
 				
 			    dRealInterface dR = new dRealInterface( 0.00001 );
@@ -89,6 +90,7 @@ class Perseus {
 		PerseusCommandLineInterface thisCommandline = 
 				new PerseusCommandLineInterface(
 					new PerseusInterfaceCore( new dRealInterface(0.00001)) );
+					//new PerseusInterfaceCore( new MathematicaInterface()) );
 		thisCommandline.run();
 	}
 
