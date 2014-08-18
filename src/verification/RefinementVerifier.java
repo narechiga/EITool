@@ -1,7 +1,7 @@
 package perseus.verification;
 
 import manticore.dl.*;
-import perseus.abstractions.*;
+import hephaestos.logicsolvers.abstractions.*;
 import java.util.*;
 
 public class RefinementVerifier{

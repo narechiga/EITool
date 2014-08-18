@@ -3,7 +3,7 @@ package perseus.core;
 import java.util.*;
 import java.io.*;
 import manticore.dl.*;
-import perseus.abstractions.*;
+import hephaestos.logicsolvers.abstractions.*;
 
 /***/
 import perseus.verification.*;

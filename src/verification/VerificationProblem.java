@@ -1,6 +1,6 @@
 package perseus.verification;
 
-import perseus.abstractions.*;
+import hephaestos.logicsolvers.abstractions.*;
 import manticore.dl.*;
 import java.util.*;
 

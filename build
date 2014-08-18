@@ -2,33 +2,40 @@
 
 # Do clean import of Manticore
 `rm -rf src/manticoredlport`;
+`rm -rf src/hephaestosport`;
 `mkdir src/manticoredlport`;
+`mkdir src/hephaestosport`;
+`mkdir src/hephaestosport/logicsolvers`;
 `cp \$MANTICORESRC/dl/* src/manticoredlport`;
+`cp -R \$HEPHAESTOSSRC/logicsolvers/* src/hephaestosport/logicsolvers`;
 
 # Compile
 `cd src/manticoredlport; jflex Lexer.lex; bison YYParser.y`;
 `cd src/manticoredlport; ./GenerateNativeInterpretation`;
-`javac src/*.java src/manticoredlport/*.java src/mathematicakit/*.java src/drealkit/*.java src/core/*.java src/abstractions/*.java src/verification/*.java`;
+`javac src/*.java src/manticoredlport/*.java src/hephaestosport/logicsolvers/mathematicakit/*.java src/hephaestosport/logicsolvers/drealkit/*.java src/core/*.java src/hephaestosport/logicsolvers/abstractions/*.java src/verification/*.java`;
 
 # Organize
 `rm -rf bin`;
-`mkdir bin; mkdir bin/manticore; mkdir bin/perseus;`; 
+`mkdir bin; mkdir bin/manticore; mkdir bin/perseus; mkdir bin/hephaestos`; 
 `mv src/*.class bin`;
 	# libs
 	`mkdir bin/manticore/dl`;
-	`mkdir bin/perseus/mathematicakit`;
-	`mkdir bin/perseus/drealkit`;
 	`mkdir bin/perseus/core;`;
-	`mkdir bin/perseus/abstractions;`;
 	`mkdir bin/perseus/verification;`;
+
+	`mkdir bin/hephaestos/abstractions;`;
+	`mkdir bin/hephaestos/mathematicakit`;
+	`mkdir bin/hephaestos/drealkit`;
 
 
 	`mv src/manticoredlport/*.class bin/manticore/dl`;
-	`mv src/mathematicakit/*.class bin/perseus/mathematicakit/`;
-	`mv src/drealkit/*.class bin/perseus/drealkit/`;
 	`mv src/core/*.class bin/perseus/core/`;
-	`mv src/abstractions/*.class bin/perseus/abstractions/`;
 	`mv src/verification/*.class bin/perseus/verification/`;
+	
+	`mv src/hephaestosport/logicsolvers/abstractions/*.class bin/hephaestos/abstractions`;
+	`mv src/hephaestosport/logicsolvers/drealkit/*.class bin/hephaestos/drealkit`;
+	`mv src/hephaestosport/logicsolvers/mathematicakit/*.class bin/hephaestos/mathematicakit`;
+
 
 
 
