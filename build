@@ -23,18 +23,19 @@
 	`mkdir bin/perseus/core;`;
 	`mkdir bin/perseus/verification;`;
 
-	`mkdir bin/hephaestos/abstractions;`;
-	`mkdir bin/hephaestos/mathematicakit`;
-	`mkdir bin/hephaestos/drealkit`;
+	`mkdir bin/hephaestos/logicsolvers;`;
+	`mkdir bin/hephaestos/logicsolvers/abstractions;`;
+	`mkdir bin/hephaestos/logicsolvers/mathematicakit`;
+	`mkdir bin/hephaestos/logicsolvers/drealkit`;
 
 
 	`mv src/manticoredlport/*.class bin/manticore/dl`;
 	`mv src/core/*.class bin/perseus/core/`;
 	`mv src/verification/*.class bin/perseus/verification/`;
 	
-	`mv src/hephaestosport/logicsolvers/abstractions/*.class bin/hephaestos/abstractions`;
-	`mv src/hephaestosport/logicsolvers/drealkit/*.class bin/hephaestos/drealkit`;
-	`mv src/hephaestosport/logicsolvers/mathematicakit/*.class bin/hephaestos/mathematicakit`;
+	`mv src/hephaestosport/logicsolvers/abstractions/*.class bin/hephaestos/logicsolvers/abstractions`;
+	`mv src/hephaestosport/logicsolvers/drealkit/*.class bin/hephaestos/logicsolvers/drealkit`;
+	`mv src/hephaestosport/logicsolvers/mathematicakit/*.class bin/hephaestos/logicsolvers/mathematicakit`;
 
 
 
