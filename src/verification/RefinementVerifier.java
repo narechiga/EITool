@@ -114,7 +114,7 @@ public class RefinementVerifier{
 //
 
 // 
-	public ArrayList<Valuation> cleverlySampleSet( dLFormula thisSet,
+	protected ArrayList<Valuation> cleverlySampleSet( dLFormula thisSet,
 							int numberOfPoints,
 							double suggestedRadius,
 							double resolution ) throws Exception {
@@ -183,7 +183,7 @@ public class RefinementVerifier{
 
 
 //
-	public ArrayList<Valuation> dumblySampleSet( dLFormula thisSet,
+	protected ArrayList<Valuation> dumblySampleSet( dLFormula thisSet,
 							int numberOfPoints,
 							double suggestedRadius ) throws Exception {
 		// This function just tries to allocate the given number of points at the suggested radius
@@ -338,7 +338,7 @@ public class RefinementVerifier{
 // Creates a formula that represents a ball at the given center with the given radius. 
 // Maybe the best approach is to actually create a separate class for balls, open and closed.
 // And add them to the parser? That might be a bit annoying
-	public ComparisonFormula createBallExclusionFormula( Valuation center, Real radius ) throws Exception {
+	protected ComparisonFormula createBallExclusionFormula( Valuation center, Real radius ) throws Exception {
 
 		ComparisonFormula ballFormula;
 
@@ -368,20 +368,6 @@ public class RefinementVerifier{
 
 		return ballFormula;
 	}
-
-// A utility formula
-//	public ArrayList<dLFormula> splitOnAnds ( dLFormula thisFormula ) {
-//		ArrayList<dLFormula> subFormulas = new ArrayList<dLFormula>();
-//
-//		if ( !(thisFormula instanceof AndFormula ) ) {
-//			subFormulas.add( thisFormula );
-//		} else {
-//			subFormulas.addAll( splitOnAnds( ((AndFormula)thisFormula).getLHS() ) );
-//			subFormulas.addAll( splitOnAnds( ((AndFormula)thisFormula).getRHS() ) );
-//		}
-//
-//		return subFormulas;
-//	}
 
 // Tries to verify the given control law by refinement.
 // 	1. Chooses a parameter point, 
