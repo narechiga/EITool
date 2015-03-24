@@ -1,7 +1,9 @@
 package perseus.verification;
 
-import hephaestos.logicsolvers.abstractions.*;
-import manticore.dl.*;
+import proteus.dl.parser.*;
+import proteus.dl.syntax.*;
+import proteus.dl.semantics.*;
+import proteus.logicsolvers.abstractions.*;
 import java.util.*;
 
 public class VerificationProblem extends ProblemStatement {

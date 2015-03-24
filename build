@@ -1,41 +1,63 @@
 #!/usr/bin/perl
 
-# Do clean import of Manticore
-`rm -rf src/manticoredlport`;
-`rm -rf src/hephaestosport`;
-`mkdir src/manticoredlport`;
-`mkdir src/hephaestosport`;
-`mkdir src/hephaestosport/logicsolvers`;
-`cp \$MANTICORESRC/dl/* src/manticoredlport`;
-`cp -R \$HEPHAESTOSSRC/logicsolvers/* src/hephaestosport/logicsolvers`;
+use FindBin;
+
+$ENV{"PERSEUS"} = "$FindBin::Bin";
+$ENV{"PROTEUS"} = "/home/nikos/Programs/proteus";
+$ENV{"CLASSPATH"} = "/usr/share/java/junit4.jar";
+
+`cd bin; rm -rf *`;
+`mkdir bin/perseus`;
+
 
 # Compile
-`cd src/manticoredlport; jflex Lexer.lex; bison YYParser.y`;
-`cd src/manticoredlport; ./GenerateNativeInterpretation`;
-`javac src/*.java src/manticoredlport/*.java src/hephaestosport/logicsolvers/mathematicakit/*.java src/hephaestosport/logicsolvers/drealkit/*.java src/core/*.java src/hephaestosport/logicsolvers/abstractions/*.java src/verification/*.java`;
+`cd \$PROTEUS/src/dl/parser; jflex dLLexer.lex; bison dLParser.y`;
+#`cd \$PROTEUS/src/dl/semantics; ./GenerateNativeInterpretation`;
+`javac src/*.java \$PROTEUS/src/dl/parser/*.java \$PROTEUS/src/dl/syntax/*.java \$PROTEUS/src/dl/semantics/*.java \$PROTEUS/src/logicsolvers/mathematicakit/*.java \$PROTEUS/src/logicsolvers/drealkit/*.java src/core/*.java \$PROTEUS/src/logicsolvers/abstractions/*.java src/verification/*.java`;
 
 # Organize
 `rm -rf bin`;
-`mkdir bin; mkdir bin/manticore; mkdir bin/perseus; mkdir bin/hephaestos`; 
+### PROTEUS
+`mkdir bin; mkdir bin/manticore; mkdir bin/perseus;`;
+`mkdir bin/proteus`;
+`mkdir bin/proteus/analytics`;
+
+`mkdir bin/proteus/dl`;
+`mkdir bin/proteus/dl/parser`;
+`mkdir bin/proteus/dl/syntax`;
+`mkdir bin/proteus/dl/semantics`;
+
+`mkdir bin/proteus/externaltools`;
+`mkdir bin/proteus/externaltools/matlabscriptingkit`;
+
+`mkdir bin/proteus/logicsolvers`;
+`mkdir bin/proteus/logicsolvers/abstractions`;
+`mkdir bin/proteus/logicsolvers/mathematicakit`;
+
+`mkdir bin/proteus/tests`;
+
 `mv src/*.class bin`;
+
 	# libs
-	`mkdir bin/manticore/dl`;
 	`mkdir bin/perseus/core;`;
 	`mkdir bin/perseus/verification;`;
 
-	`mkdir bin/hephaestos/logicsolvers;`;
-	`mkdir bin/hephaestos/logicsolvers/abstractions;`;
-	`mkdir bin/hephaestos/logicsolvers/mathematicakit`;
-	`mkdir bin/hephaestos/logicsolvers/drealkit`;
+	`mkdir bin/proteus/logicsolvers;`;
+	`mkdir bin/proteus/logicsolvers/abstractions;`;
+	`mkdir bin/proteus/logicsolvers/mathematicakit`;
+	`mkdir bin/proteus/logicsolvers/drealkit`;
 
+	`mv \$PROTEUS/src/dl/parser/*.class bin/proteus/dl/parser/`;
+	`mv \$PROTEUS/src/dl/syntax/*.class bin/proteus/dl/syntax/`;
+	`mv \$PROTEUS/src/dl/semantics/*.class bin/proteus/dl/semantics/`;
 
-	`mv src/manticoredlport/*.class bin/manticore/dl`;
+	`mv \$PROTEUS/*.class bin/proteus/dl`;
 	`mv src/core/*.class bin/perseus/core/`;
 	`mv src/verification/*.class bin/perseus/verification/`;
 	
-	`mv src/hephaestosport/logicsolvers/abstractions/*.class bin/hephaestos/logicsolvers/abstractions`;
-	`mv src/hephaestosport/logicsolvers/drealkit/*.class bin/hephaestos/logicsolvers/drealkit`;
-	`mv src/hephaestosport/logicsolvers/mathematicakit/*.class bin/hephaestos/logicsolvers/mathematicakit`;
+	`mv \$PROTEUS/src/logicsolvers/abstractions/*.class bin/proteus/logicsolvers/abstractions`;
+	`mv \$PROTEUS/src/logicsolvers/drealkit/*.class bin/proteus/logicsolvers/drealkit`;
+	`mv \$PROTEUS/src/logicsolvers/mathematicakit/*.class bin/proteus/logicsolvers/mathematicakit`;
 
 
 

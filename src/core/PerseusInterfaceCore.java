@@ -2,13 +2,15 @@ package perseus.core;
 
 import java.util.*;
 import java.io.*;
-import manticore.dl.*;
-import hephaestos.logicsolvers.abstractions.*;
+import proteus.dl.parser.*;
+import proteus.dl.syntax.*;
+import proteus.dl.semantics.*;
+import proteus.logicsolvers.abstractions.*;
 
 /***/
 import perseus.verification.*;
 
-/* later, refine this from hephaestos InterfaceCore */
+/* later, refine this from proteus InterfaceCore */
 public class PerseusInterfaceCore {
 
 	public static final String ANSI_RESET = "\u001B[0m";
@@ -53,15 +55,15 @@ public class PerseusInterfaceCore {
 		dLFormula overallEnvelope = null;
 		String input;
 		StringReader inReader;
-		Lexer thisLexer;
-		YYParser thisParser;
+		dLLexer thisLexer;
+		dLParser thisParser;
 		for ( int i = 0; i < numberOfParts; i ++ ) {
 			System.out.println("Parameter valuation " + i + "? : ");
 			input = thisScanner.nextLine().trim();
 
 			inReader = new StringReader( input );
-                	thisLexer = new Lexer( inReader );
-                	thisParser = new YYParser( thisLexer );
+                	thisLexer = new dLLexer( inReader );
+                	thisParser = new dLParser( thisLexer );
                 	thisParser.parse();
 
                 	if ( thisParser.valuation == null ) {
@@ -124,8 +126,8 @@ public class PerseusInterfaceCore {
 		Scanner valuationScanner = new Scanner( System.in );
 		String input = valuationScanner.nextLine();
 		StringReader inreader = new StringReader( input );
-                Lexer myLexer = new Lexer( inreader );
-                YYParser myParser = new YYParser( myLexer );
+                dLLexer myLexer = new dLLexer( inreader );
+                dLParser myParser = new dLParser( myLexer );
                 myParser.parse();
 
 		Valuation parameters = myParser.valuation;
@@ -200,8 +202,8 @@ public class PerseusInterfaceCore {
 		System.out.println(ANSI_YELLOW + ANSI_BOLD + "NOTE: " + ANSI_RESET + "only verification queries are fully supported at this time");
 
 		System.out.println("Loading " + input + " (...)");
-		Lexer thisLexer = new Lexer( new FileReader( input ) );
-		YYParser thisParser = new YYParser( thisLexer );
+		dLLexer thisLexer = new dLLexer( new FileReader( input ) );
+		dLParser thisParser = new dLParser( thisLexer );
 		thisParser.parse();
 		
 		if ( thisParser.synthesis ) {
@@ -222,8 +224,8 @@ public class PerseusInterfaceCore {
 
 // Just parse a file
 	public void runParser( String input ) throws Exception {
-		Lexer thisLexer = new Lexer( new StringReader( input ) );
-		YYParser thisParser = new YYParser( thisLexer );
+		dLLexer thisLexer = new dLLexer( new StringReader( input ) );
+		dLParser thisParser = new dLParser( thisLexer );
 		thisParser.parse();
 		System.out.println("PARSED: " + thisParser.parsedStructure.toMathematicaString() );
 	}
@@ -231,8 +233,8 @@ public class PerseusInterfaceCore {
 // Search for a satisfying instance
 	public void findInstance( String input ) throws Exception {
                 StringReader inreader = new StringReader( input );
-                Lexer myLexer = new Lexer( inreader );
-                YYParser myParser = new YYParser( myLexer );
+                dLLexer myLexer = new dLLexer( inreader );
+                dLParser myParser = new dLParser( myLexer );
                 myParser.parse();
 
                 if ( (myParser.parsedStructure instanceof dLFormula)  ) {

@@ -1,7 +1,10 @@
 package perseus.verification;
 
-import manticore.dl.*;
-import hephaestos.logicsolvers.abstractions.*;
+import proteus.dl.parser.*;
+import proteus.dl.syntax.*;
+import proteus.dl.semantics.*;
+
+import proteus.logicsolvers.abstractions.*;
 import java.util.*;
 
 public class RefinementVerifier{
@@ -240,7 +243,7 @@ public class RefinementVerifier{
 			comment = comment + solver.commentLine(eiparameteriterator.next().toMathematicaString());
 		}
 		// Control variables
-		Set<RealVariable> controlVariables = controllaw.getVariables();
+		Set<RealVariable> controlVariables = controllaw.getFreeVariables();
 		controlVariables.removeAll( statevariables );
 		Iterator<RealVariable> controlVariableIterator = controlVariables.iterator();
 		comment = comment + "\n" + solver.commentLine("Control variables are");
@@ -291,7 +294,7 @@ public class RefinementVerifier{
 		}
 
 		// Control variables
-		Set<RealVariable> controlVariables = controllaw.getVariables();
+		Set<RealVariable> controlVariables = controllaw.getFreeVariables();
 		controlVariables.removeAll( statevariables );
 		Iterator<RealVariable> controlVariableIterator = controlVariables.iterator();
 		comment = comment + solver.commentLine("Control variables are");

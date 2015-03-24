@@ -1,10 +1,13 @@
 import java.io.*;
 import java.util.*;
 
-import manticore.dl.*;
+import proteus.dl.parser.*;
+import proteus.dl.syntax.*;
+import proteus.dl.semantics.*;
+
 import perseus.core.*;
-import hephaestos.logicsolvers.mathematicakit.*;
-import hephaestos.logicsolvers.drealkit.*;
+import proteus.logicsolvers.mathematicakit.*;
+import proteus.logicsolvers.drealkit.*;
 
 
 class Perseus {
@@ -27,8 +30,8 @@ class Perseus {
 		    String filename = args[0];
 
 		    try {
-			Lexer hbLexer = new Lexer( new FileReader( args[0] ) );
-			YYParser hbParser = new YYParser( hbLexer );
+			dLLexer hbLexer = new dLLexer( new FileReader( args[0] ) );
+			dLParser hbParser = new dLParser( hbLexer );
 			hbParser.parse();
 
 			if ( !hbParser.synthesis ) {

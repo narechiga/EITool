@@ -3,7 +3,7 @@ package perseus.core;
 
 import java.io.*;
 import java.util.*;
-import hephaestos.logicsolvers.abstractions.*;
+import proteus.logicsolvers.abstractions.*;
 import perseus.verification.*;
 
 public class PerseusCommandLineInterface {
