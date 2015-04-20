@@ -38,7 +38,7 @@ class Perseus {
 			    System.out.println("The control envelope is: " + hbParser.envelope.toKeYmaeraString() );
 			    System.out.println("The invariant is: " + hbParser.invariant.toKeYmaeraString() );
 			    System.out.println("The robust parameters are: " 
-			    			+ hbParser.robustparameters.toKeYmaeraString() );
+			    			+ hbParser.eiparameterset.toKeYmaeraString() );
 			    System.out.println("The control law is: " + hbParser.control.toKeYmaeraString() );
 				
 			    dRealInterface dR = new dRealInterface( 0.00001 );
@@ -47,7 +47,7 @@ class Perseus {
 			//							hbParser.eiparameters,
 			//							hbParser.envelope,
 			//							hbParser.invariant,
-			//							hbParser.robustparameters,
+			//							hbParser.eiParameterSetet,
 			//        						hbParser.domain,
 			//							hbParser.control,
 			//							1);
@@ -57,7 +57,7 @@ class Perseus {
 			//				hbParser.eiparameters,
 			//				hbParser.envelope,
 			//				hbParser.invariant,
-			//				hbParser.robustparameters,
+			//				hbParser.eiParameterSetet,
 			//        			hbParser.domain,
 			//				hbParser.control,
 			//				0.1);
@@ -67,14 +67,14 @@ class Perseus {
 			    //    						  hbParser.eiparameters,
 			    //    						  hbParser.envelope,
 			    //    						  hbParser.invariant,
-			    //    						  hbParser.robustparameters,
+			    //    						  hbParser.eiParameterSetet,
 			    //    						  hbParser.control
 			    //    						  );
 			    //  
 			} else {
 			    System.out.println("The control envelope is: " + hbParser.envelope.toKeYmaeraString() );
 			    System.out.println("The invariant is: " + hbParser.invariant.toKeYmaeraString() );
-			    System.out.println("The robust parameters are: " + hbParser.robustparameters.toKeYmaeraString() );
+			    System.out.println("The robust parameters are: " + hbParser.eiparameterset.toKeYmaeraString() );
 			    System.out.println("The control template is: " + hbParser.control.toKeYmaeraString() );
 				
 			}
@@ -92,8 +92,8 @@ class Perseus {
 	public static void commandLine() {
 		PerseusCommandLineInterface thisCommandline = 
 				new PerseusCommandLineInterface(
-					new PerseusInterfaceCore( new dRealInterface(0.00001)) );
-					//new PerseusInterfaceCore( new MathematicaInterface()) );
+					//new PerseusInterfaceCore( new dRealInterface(1)) );
+					new PerseusInterfaceCore( new MathematicaInterface()) );
 		thisCommandline.run();
 	}
 

@@ -24,7 +24,7 @@ Future extensions:
 
 Summary of procedure
 1. Parse in an envelope-invariant pair, and parameter constraints---mainly from an input file, but support commandline as well
-	\envelope { ... } \invariant { ... } \robustparameters { ... } \controllaw { ... }
+	\envelope { ... } \invariant { ... } \eiParameterSet { ... } \controllaw { ... }
 	-> separated by newlines since it makes this prototype parser simpler
 
 2. Parse in a control law

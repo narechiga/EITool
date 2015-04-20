@@ -9,15 +9,22 @@ import java.util.*;
 public class VerificationProblem extends ProblemStatement {
 	public dLFormula control;
 
-	public VerificationProblem ( List<RealVariable> stateVariables, List<RealVariable> eiParameters, 
-					dLFormula envelope, dLFormula invariant, dLFormula robustParameters, 
-					dLFormula domain, dLFormula control ) {
+	public VerificationProblem ( 
+					List<RealVariable> stateVariables, 
+					dLFormula initialSet,
+					dLFormula safeSet,
+					dLFormula eiparameterset,
+					List<RealVariable> eiParameters, 
+					dLFormula envelope, 
+					dLFormula invariant, 
+					dLFormula control ) {
 		this.stateVariables = stateVariables;
+		this.initialSet = initialSet;
+		this.safeSet = safeSet;
+		this.eiParameterSet = eiparameterset;
 		this.eiParameters = eiParameters;
 		this.envelope = envelope;
 		this.invariant = invariant;
-		this.robustParameters = robustParameters;
-		this.domain = domain;
 		this.control = control;
 	}
 
@@ -26,11 +33,12 @@ public class VerificationProblem extends ProblemStatement {
 
 		returnString = returnString +"{ :: verification problem instance\n";
 		returnString = returnString +"stateVariables: " + stateVariables.toString() + "\n";
+		returnString = returnString +"initialSet: " + initialSet.toString() + "\n";
+		returnString = returnString +"safeSet: " + safeSet.toString() + "\n";
 		returnString = returnString +"eiParameters: " + eiParameters.toString() + "\n";
+		returnString = returnString +"eiParameterSet: " + eiParameterSet.toString() + "\n";
 		returnString = returnString +"envelope: " + envelope.toMathematicaString() + "\n";
 		returnString = returnString +"invariant: " + invariant.toMathematicaString() + "\n";
-		returnString = returnString +"robustParameters: " + robustParameters.toMathematicaString() + "\n";
-		returnString = returnString +"domain: " + domain.toMathematicaString() + "\n";
 		returnString = returnString +"control: " + control.toMathematicaString() + "\n";
 		returnString = returnString + "}";
 

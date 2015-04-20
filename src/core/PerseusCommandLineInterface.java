@@ -32,9 +32,10 @@ public class PerseusCommandLineInterface {
 		System.out.println("Type \"help\" for a list of available commands");
 		while (true) {
 			try {
-				System.out.print( ANSI_BOLD +"perseus> " + ANSI_RESET);
+				System.out.print( ANSI_BOLD + ANSI_BLUE +"perseus> " + ANSI_RESET + ANSI_YELLOW );
 
 				String input = commandScanner.nextLine();
+				System.out.println( ANSI_RESET );
 				input = input.trim();
 				Scanner in = new Scanner( input );
 

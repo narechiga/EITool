@@ -34,7 +34,7 @@ public class RefinementVerifier{
 			List<RealVariable> eiparameters,
 			dLFormula envelope,
 			dLFormula invariant,
-			dLFormula robustparameters,
+			dLFormula eiParameterSet,
 			dLFormula domain,
 			dLFormula controllaw,
 			double resolution ) throws Exception {
@@ -48,7 +48,7 @@ public class RefinementVerifier{
 		boolean success; boolean robustDomainCoverage;
 		do {
 			// Choose the some parameters
-			parameterSamples = cleverlySampleSet( robustparameters, numberOfParts, 2*resolution, resolution  );
+			parameterSamples = cleverlySampleSet( eiParameterSet, numberOfParts, 2*resolution, resolution  );
 			if ( parameterSamples.size() < numberOfParts ) {
 				throw new Exception( ANSI_BOLD + ANSI_RED + "No more parameters at this resolution!" 
 								+ ANSI_RESET);
@@ -217,61 +217,61 @@ public class RefinementVerifier{
 // Writes a single refinement verification query. The main reason this function is nice w.r.t. the simple 
 // query writing function is that it adds neat comments to point out the different portions
 // TAINTED
-	public LogicSolverResult singleRefinementVerificationQuery(
-			List<RealVariable> statevariables,
-			List<RealVariable> eiparameters,
-			dLFormula envelope,
-			dLFormula invariant,
-			Valuation robustparameters,
-			dLFormula controllaw ) throws Exception {
-
-		String comment = "";
-		ArrayList<dLFormula> theseFormulas = new ArrayList<dLFormula>();
-		String filename = solver.decorateFilename("refinementQuery");
-
-		// State variables
-		Iterator<RealVariable> stateVariableIterator = statevariables.iterator();
-		comment = comment + solver.commentLine("State variables are");
-		while ( stateVariableIterator.hasNext() ) {
-			comment = comment + solver.commentLine(stateVariableIterator.next().toMathematicaString());
-		}
-
-		// EIParameters
-		Iterator<RealVariable> eiparameteriterator = eiparameters.iterator();
-		comment = comment + "\n" + solver.commentLine("EI Parameters are");
-		while ( eiparameteriterator.hasNext() ) {
-			comment = comment + solver.commentLine(eiparameteriterator.next().toMathematicaString());
-		}
-		// Control variables
-		Set<RealVariable> controlVariables = controllaw.getFreeVariables();
-		controlVariables.removeAll( statevariables );
-		Iterator<RealVariable> controlVariableIterator = controlVariables.iterator();
-		comment = comment + "\n" + solver.commentLine("Control variables are");
-		while ( controlVariableIterator.hasNext() ) {
-			comment = comment + solver.commentLine(controlVariableIterator.next().toMathematicaString());
-		}
-
-		// Invariant
-		comment = comment + "\n" + solver.commentLine("Invariant is: ") 
-					+ solver.commentLine(invariant.toMathematicaString());
-
-		// Control law
-		comment = comment + "\n" + solver.commentLine("Control law is: ")
-					+ solver.commentLine(controllaw.toMathematicaString());
-
-		// Envelope
-		comment = comment + "\n" + solver.commentLine("Envelope is (note that we will assert its negation): "
-				+ envelope.toMathematicaString());
-
-		AndFormula invariantAndControl = new AndFormula( invariant.substituteConcreteValuation( robustparameters), 
-								controllaw );
-		ImpliesFormula invariantAndControlImpliesEnvelope = new ImpliesFormula(
-					invariantAndControl, envelope.substituteConcreteValuation( robustparameters ) );
-
-		return solver.checkValidity( filename, invariantAndControlImpliesEnvelope, comment );
-
-
-	}
+//	public LogicSolverResult singleRefinementVerificationQuery(
+//			List<RealVariable> statevariables,
+//			List<RealVariable> eiparameters,
+//			dLFormula envelope,
+//			dLFormula invariant,
+//			Valuation eiParameterSet,
+//			dLFormula controllaw ) throws Exception {
+//
+//		String comment = "";
+//		ArrayList<dLFormula> theseFormulas = new ArrayList<dLFormula>();
+//		String filename = solver.decorateFilename("refinementQuery");
+//
+//		// State variables
+//		Iterator<RealVariable> stateVariableIterator = statevariables.iterator();
+//		comment = comment + solver.commentLine("State variables are");
+//		while ( stateVariableIterator.hasNext() ) {
+//			comment = comment + solver.commentLine(stateVariableIterator.next().toMathematicaString());
+//		}
+//
+//		// EIParameters
+//		Iterator<RealVariable> eiparameteriterator = eiparameters.iterator();
+//		comment = comment + "\n" + solver.commentLine("EI Parameters are");
+//		while ( eiparameteriterator.hasNext() ) {
+//			comment = comment + solver.commentLine(eiparameteriterator.next().toMathematicaString());
+//		}
+//		// Control variables
+//		Set<RealVariable> controlVariables = controllaw.getFreeVariables();
+//		controlVariables.removeAll( statevariables );
+//		Iterator<RealVariable> controlVariableIterator = controlVariables.iterator();
+//		comment = comment + "\n" + solver.commentLine("Control variables are");
+//		while ( controlVariableIterator.hasNext() ) {
+//			comment = comment + solver.commentLine(controlVariableIterator.next().toMathematicaString());
+//		}
+//
+//		// Invariant
+//		comment = comment + "\n" + solver.commentLine("Invariant is: ") 
+//					+ solver.commentLine(invariant.toMathematicaString());
+//
+//		// Control law
+//		comment = comment + "\n" + solver.commentLine("Control law is: ")
+//					+ solver.commentLine(controllaw.toMathematicaString());
+//
+//		// Envelope
+//		comment = comment + "\n" + solver.commentLine("Envelope is (note that we will assert its negation): "
+//				+ envelope.toMathematicaString());
+//
+//		AndFormula invariantAndControl = new AndFormula( invariant.substituteConcreteValuation( eiParameterSet), 
+//								controllaw );
+//		ImpliesFormula invariantAndControlImpliesEnvelope = new ImpliesFormula(
+//					invariantAndControl, envelope.substituteConcreteValuation( eiParameterSet ) );
+//
+//		return solver.checkValidity( filename, invariantAndControlImpliesEnvelope, comment );
+//
+//
+//	}
 
 
 // *** assorted helper functions and the like
@@ -381,79 +381,162 @@ public class RefinementVerifier{
 // 	5. Keeps doing this until it succeeds.
 	public Valuation parametricVerify (
 			List<RealVariable> statevariables,
-			List<RealVariable> eiparameters,
+			dLFormula initialSet,
+			dLFormula safeSet,
+			List<RealVariable> eiParameters,
+			dLFormula eiParameterSet,
 			dLFormula envelope,
 			dLFormula invariant,
-			dLFormula robustparameters,
-			dLFormula domain,
-			dLFormula controllaw,
-			double resolution ) throws Exception {
-
+			dLFormula controlLaw,
+			double delta ) throws Exception {
 		
-		Valuation witnessParameters = new Valuation();
-		boolean success = false;
-		dLFormula parameterSamplingFormula = robustparameters;
-		Valuation thisParameter;
+		// Build the refinement formula
+		dLFormula refinementFormula = constructRefinementFormula( envelope, invariant, controlLaw);
+		//System.out.println("Refinement formula is: ");
+		//System.out.println( refinementFormula.toMathematicaString() );
+		dLFormula invariantInitializedFormula = constructInvariantInitializedFormula( initialSet, invariant );
+		dLFormula invariantSafeFormula = constructInvariantSafeFormula( invariant, safeSet);
+
+		//System.out.println("Refinement formula is: " + refinementFormula.toMathematicaString() );
+		//System.out.println("Free variables are: " + refinementFormula.getFreeVariables().toString() );
+
+		// Pick an initial eStar, to kick things off
+		Valuation eStar = solver.sample( eiParameterSet );
+		ArrayList<Valuation> newSamples = new ArrayList<>();
+		ArrayList<dLFormula> constraints = new ArrayList<>();
+		constraints.add( eiParameterSet );
 		
-		while ( success == false ) {
-			// Pick a parameter point
-			if ( debug ) {
-				System.out.println("Choosing a parameter valuation...");
-				System.out.println("Parameter sampling formula is: " + parameterSamplingFormula);
-			}
+		int i = 0;
+		while ( true ) {
+			i = i + 1;
 			
-			thisParameter = solver.findInstance( parameterSamplingFormula ).valuation;
+			// Check if e* is good
+			//System.out.println("Going to check e*...: " + eStar.toMathematicaString() );
+			//System.out.println("Substituted formula is: " + refinementFormula.plugIn( eStar ).toMathematicaString() );
+			//System.out.println("Is initialization valid?");
+			//solver.isValid( invariantInitializedFormula.plugIn( eStar ));
+			//System.out.println("Is refinement valid?");
+			//solver.isValid( refinementFormula.plugIn( eStar ) );
+			//System.out.println("Is safety valid?");
+			//solver.isValid( invariantSafeFormula.plugIn( eStar ) );
 
+			//LogicSolverResult refinementResult = singleRefinementVerificationQuery(statevariables, envelope.plugIn( eStar ), invariant.plugIn(eStar), controlLaw );
+			//boolean refinementIsValid = false;
+			//System.out.println("Refinement validity: " + refinementResult.validity );
+			//if ( refinementResult.validity.equals("valid") ) {
+			//	refinementIsValid = true;
+			//} else {
+			//	System.out.println("Possible counterexample is: " + refinementResult.valuation.toMathematicaString() );
+			//}
+			if ( 
+				solver.isValid( invariantInitializedFormula.plugIn( eStar ))
+				&& solver.isValid( invariantSafeFormula.plugIn( eStar ) ) 
+				&& solver.isValid( refinementFormula.plugIn( eStar ) )
+			) {
+
+				System.out.println(ANSI_GREEN + ANSI_BOLD + "Verified successfully!" + ANSI_RESET );
+				System.out.println("(...) with envelope parameters: "+ ANSI_CYAN + ANSI_BOLD + eStar.toMathematicaString() + ANSI_RESET );
+				return eStar;
+			} 
 			
-			if ( thisParameter.isEmpty() ) {
-				throw new Exception( ANSI_BOLD + ANSI_RED + "No more parameters at this resolution!" 
-										+ ANSI_RESET);
-			}
-			System.out.println("Trying refinement with parameter valuation: " 
-							+ thisParameter.toMathematicaString() );
-			dLFormula substitutedInvariant = invariant.substituteConcreteValuation( thisParameter );
+			// If it isn't, try to pick a bunch of cases that break it
+			newSamples = solver.multiSample( (refinementFormula.plugIn(eStar)).negate(), 2, delta );
+			//newSamples.addAll( solver.multiSample( (invariantInitializedFormula.plugIn(eStar)).negate(), 2, delta ) );
+			//newSamples.addAll( solver.multiSample( (invariantSafeFormula.plugIn(eStar)).negate(), 2, delta ) );
 
-			if( debug ) {
-				System.out.println("thisParameter is: " + thisParameter.toMathematicaString() );
-				System.out.println("substituted invariant is: " + substitutedInvariant.toMathematicaString() );
+			// If there aren't any at this resolution, just go ahead with the constraints on e
+			if ( newSamples.isEmpty() ) {
+				System.out.println("Couldn't find any more samples!");
+				//return null;
 			}
 
-			if ( !setARobustlyCoversSetB( substitutedInvariant, domain ) ) {
-				System.out.println( ANSI_BOLD + ANSI_YELLOW + "WARNING:" + ANSI_RESET 
-							+ " Invariant parametrization does not cover the domain robustly");
+			// Add constraints for the new samples
+			for ( Valuation newSample : newSamples ) {
+				System.out.println("(sample is: " + newSample.toMathematicaString() + " )");
+
+				//constraints.add( invariantInitializedFormula.plugIn( newSample ) );
+				//constraints.add( refinementFormula.plugIn( newSample ) );
+
+				//constraints.add( invariantSafeFormula.plugIn( newSample ) );
+				constraints.add( createBallExclusionFormula(eStar, new Real( delta) ) );
+			}
+
+			// Pick a new e*
+			System.out.println("Picking a new e*:...");
+			Valuation newEStar = solver.sample( constraints );
+			if ( newEStar == null ) {
+				return null;
+
+			} else if ( newEStar.getVariables().isEmpty() ) {
+				System.out.println("Could not find a new parameter value, sample came back empty");
+				System.out.println(ANSI_RED + ANSI_BOLD + "Verification failed." + ANSI_RESET);
+
+				//System.out.println(ANSI_BOLD + ANSI_RED + "Probably dReal didn't finish writing out its file!");
+				//System.out.println("...on iteration " + i);
+				//System.out.println("Trying again with eStar: " + eStar.toMathematicaString() );
+				//System.out.println("But waiting to see if whatever issue resolves itself in a second?");
+
+				//try {
+				//	    Thread.sleep(3000);                 //1000 milliseconds is one second.
+				//} catch(InterruptedException ex) {
+				//	    Thread.currentThread().interrupt();
+				//}
+				return null;
+
+
 			} else {
-				System.out.println( ANSI_BOLD + ANSI_CYAN + "INFO:" + ANSI_RESET 
-							+" Invariant parametrization covers domain robustly");
+				eStar = newEStar;
 			}
 
-			// Try refinement verification
-			LogicSolverResult refinementResult = singleRefinementVerificationQuery(
-					statevariables,
-					eiparameters,
-					envelope,
-					invariant,
-					thisParameter,
-					controllaw );
-			if ( refinementResult.validity.equals("valid") ) {
-				System.out.println( ANSI_BOLD + ANSI_GREEN + "Refinement successful!" + ANSI_RESET);
-				success = true;
-				witnessParameters = thisParameter;
-				System.out.println("With envelope parameters:\n" +witnessParameters.toMathematicaString());
+			System.out.println("New parameters is: " + eStar.toMathematicaString() );
+		}
+	}
 
-			} else { //update parameter formula to try a different point
-				System.out.println("Refinement " + ANSI_BOLD + ANSI_RED +"not" 
-							+ ANSI_RESET +" succesful, choosing a new parameter vector");
-									//+ refinementResult);
-				parameterSamplingFormula = new AndFormula( 
-								parameterSamplingFormula, 
-								createBallExclusionFormula( thisParameter, 
-									new Real( resolution ) ) );
-			}
+	protected dLFormula constructRefinementFormula( 
+							dLFormula envelope,
+							dLFormula invariant,
+							dLFormula controlLaw ) {
+
+		Replacement control = null;
+		if ( ( controlLaw instanceof ComparisonFormula )
+			&& ( ((ComparisonFormula)controlLaw).getLHS() instanceof RealVariable ) ) {
+
+			control = new Replacement(
+							((RealVariable)(((ComparisonFormula)controlLaw).getLHS())),
+							((ComparisonFormula)controlLaw).getRHS() );
+
+		} else {
+			throw new RuntimeException("Malformed control law: " + controlLaw.toMathematicaString() );
 		}
 
-		return witnessParameters;
+		dLFormula refinementFormula = new ImpliesFormula(
+							invariant,
+							envelope.replace( control )
+							);
+
+		System.out.println("Refinement formula is: " + refinementFormula.toMathematicaString() );
+		//System.exit(1);
+
+		return refinementFormula;
+
 
 	}
+
+	protected dLFormula constructInvariantInitializedFormula( dLFormula initialSet,
+									dLFormula invariant ) {
+		return new ImpliesFormula(
+					initialSet,
+					invariant );
+
+	}
+
+	protected dLFormula constructInvariantSafeFormula( dLFormula invariant,
+								dLFormula safeSet ) {
+		return new ImpliesFormula(
+					invariant,
+					safeSet );
+	}
+
 
 
 }

@@ -1,0 +1,39 @@
+
+/* Only slightly harder than demo zero, requires hunting for the right parameter value */
+
+\statevariables{
+	d
+}
+
+\initialset{
+	/*-21 <= d & d <= -19*/
+	d = -19
+}
+
+\safeset{
+	-30 <= d & d <= 0
+}
+
+\eiparameterset{
+	/* witness at e = 0.88 */
+	(e >= 0 ) & ( e <= 1000 )
+	
+}
+
+\envelope{
+	((0.11*e + d <= 0) & ( u <= e )) | ( u <= 0 )
+	
+}
+
+\invariant{
+	-21<= d & d <= 0
+}
+
+\controllaw{
+	u = -0.04*(d + 0.1)
+}
+
+
+
+
+

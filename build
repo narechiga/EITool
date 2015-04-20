@@ -30,10 +30,6 @@ $ENV{"CLASSPATH"} = "/usr/share/java/junit4.jar";
 `mkdir bin/proteus/externaltools`;
 `mkdir bin/proteus/externaltools/matlabscriptingkit`;
 
-`mkdir bin/proteus/logicsolvers`;
-`mkdir bin/proteus/logicsolvers/abstractions`;
-`mkdir bin/proteus/logicsolvers/mathematicakit`;
-
 `mkdir bin/proteus/tests`;
 
 `mv src/*.class bin`;
@@ -51,7 +47,6 @@ $ENV{"CLASSPATH"} = "/usr/share/java/junit4.jar";
 	`mv \$PROTEUS/src/dl/syntax/*.class bin/proteus/dl/syntax/`;
 	`mv \$PROTEUS/src/dl/semantics/*.class bin/proteus/dl/semantics/`;
 
-	`mv \$PROTEUS/*.class bin/proteus/dl`;
 	`mv src/core/*.class bin/perseus/core/`;
 	`mv src/verification/*.class bin/perseus/verification/`;
 	

@@ -15,7 +15,7 @@
 	x1 >= 0
 }
 
-\robustparameters{
+\eiParameterSet{
 	p1 > 0
 }
 

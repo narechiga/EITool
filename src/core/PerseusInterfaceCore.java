@@ -89,13 +89,13 @@ public class PerseusInterfaceCore {
 			}
 		}
 
-		if ( !verifier.setARobustlyCoversSetB( overallInvariant, thisProblem.domain ) ) {
-			System.out.println( ANSI_BOLD + ANSI_YELLOW + "WARNING:" + ANSI_RESET 
-						+ " Invariant parametrization does not cover the domain robustly");
-		} else {
-			System.out.println( ANSI_BOLD + ANSI_CYAN + "INFO:" + ANSI_RESET 
-						+" Invariant parametrization covers domain robustly");
-		}
+		//if ( !verifier.setARobustlyCoversSetB( overallInvariant, thisProblem.domain ) ) {
+		//	System.out.println( ANSI_BOLD + ANSI_YELLOW + "WARNING:" + ANSI_RESET 
+		//				+ " Invariant parametrization does not cover the domain robustly");
+		//} else {
+		//	System.out.println( ANSI_BOLD + ANSI_CYAN + "INFO:" + ANSI_RESET 
+		//				+" Invariant parametrization covers domain robustly");
+		//}
 
 		// Then try refinement with the overall envelope and invariant
 		LogicSolverResult refinementResult = verifier.singleRefinementVerificationQuery(
@@ -135,13 +135,13 @@ public class PerseusInterfaceCore {
 		dLFormula substitutedEnvelope = thisProblem.envelope.substituteConcreteValuation( parameters );
 		dLFormula substitutedInvariant = thisProblem.invariant.substituteConcreteValuation( parameters );
 
-		if ( !verifier.setARobustlyCoversSetB( substitutedInvariant, thisProblem.domain ) ) {
-			System.out.println( ANSI_BOLD + ANSI_YELLOW + "WARNING:" + ANSI_RESET 
-						+ " Invariant parametrization does not cover the domain robustly");
-		} else {
-			System.out.println( ANSI_BOLD + ANSI_CYAN + "INFO:" + ANSI_RESET 
-						+" Invariant parametrization covers domain robustly");
-		}
+		//if ( !verifier.setARobustlyCoversSetB( substitutedInvariant, thisProblem.domain ) ) {
+		//	System.out.println( ANSI_BOLD + ANSI_YELLOW + "WARNING:" + ANSI_RESET 
+		//				+ " Invariant parametrization does not cover the domain robustly");
+		//} else {
+		//	System.out.println( ANSI_BOLD + ANSI_CYAN + "INFO:" + ANSI_RESET 
+		//				+" Invariant parametrization covers domain robustly");
+		//}
 
 		LogicSolverResult refinementResult = verifier.singleRefinementVerificationQuery(
 									thisProblem.stateVariables,
@@ -166,18 +166,19 @@ public class PerseusInterfaceCore {
 			System.out.println("I don't have a verifier!");
 		}
 
-
-
 		Valuation witness = verifier.parametricVerify( thisProblem.stateVariables,
+							thisProblem.initialSet,
+							thisProblem.safeSet,
 							thisProblem.eiParameters,
+							thisProblem.eiParameterSet,
 							thisProblem.envelope,
 							thisProblem.invariant,
-							thisProblem.robustParameters,
-							thisProblem.domain,
 							thisProblem.control,
 							1.0 );
 
-		if ( witness.isEmpty() ) {
+		if ( witness == null ) {
+			return false;
+		} else if ( witness.isEmpty() ) {
 			return false;
 		} else {
 			return true;
@@ -187,19 +188,20 @@ public class PerseusInterfaceCore {
 	
 // Automatically try to refine by parts	
 	public void autoParts( VerificationProblem thisProblem ) throws Exception {
-		verifier.parametricVerifyByParts( thisProblem.stateVariables,
-					thisProblem.eiParameters,
-					thisProblem.envelope,
-					thisProblem.invariant,
-					thisProblem.robustParameters,
-					thisProblem.domain,
-					thisProblem.control,
-					0.1 );
+		//verifier.parametricVerifyByParts( thisProblem.stateVariables,
+		//			thisProblem.eiParameters,
+		//			thisProblem.envelope,
+		//			thisProblem.invariant,
+		//			thisProblem.eiParameterSet,
+		//			thisProblem.domain,
+		//			thisProblem.control,
+		//			0.1 );
 	}
 
 // Load a verification problem statement from a file
 	public VerificationProblem loadFromFile( String input ) throws Exception {
-		System.out.println(ANSI_YELLOW + ANSI_BOLD + "NOTE: " + ANSI_RESET + "only verification queries are fully supported at this time");
+		System.out.println(ANSI_YELLOW + ANSI_BOLD + "NOTE: " 
+					+ ANSI_RESET + "only verification queries are fully supported at this time");
 
 		System.out.println("Loading " + input + " (...)");
 		dLLexer thisLexer = new dLLexer( new FileReader( input ) );
@@ -212,11 +214,12 @@ public class PerseusInterfaceCore {
 
 		VerificationProblem thisProblem = new VerificationProblem( 
 									thisParser.statevariables,
+									thisParser.initialSet,
+									thisParser.safeSet,
+									thisParser.eiparameterset,
 									thisParser.eiparameters,
 									thisParser.envelope,
 									thisParser.invariant,
-									thisParser.robustparameters,
-									thisParser.domain,
 									thisParser.control
 									);
 		return thisProblem;
