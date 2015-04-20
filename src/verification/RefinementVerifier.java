@@ -455,8 +455,10 @@ public class RefinementVerifier{
 				System.out.println("(sample is: " + newSample.toMathematicaString() + " )");
 
 				//constraints.add( invariantInitializedFormula.plugIn( newSample ) );
-				//constraints.add( refinementFormula.plugIn( newSample ) );
 
+				System.out.println("Adding constraint: ");
+				System.out.println( refinementFormula.plugIn( newSample ).toMathematicaString() );
+				constraints.add( refinementFormula.plugIn( newSample ) );
 				//constraints.add( invariantSafeFormula.plugIn( newSample ) );
 				constraints.add( createBallExclusionFormula(eStar, new Real( delta) ) );
 			}
@@ -464,6 +466,10 @@ public class RefinementVerifier{
 			// Pick a new e*
 			System.out.println("Picking a new e*:...");
 			Valuation newEStar = solver.sample( constraints );
+
+			// for debugging
+			//Valuation newEStar = new Valuation( new RealVariable("e"), new Real("0.88")); 
+
 			if ( newEStar == null ) {
 				return null;
 

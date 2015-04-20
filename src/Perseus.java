@@ -91,9 +91,9 @@ class Perseus {
     
 	public static void commandLine() {
 		PerseusCommandLineInterface thisCommandline = 
-				new PerseusCommandLineInterface(
+				new PerseusCommandLineInterface();
 					//new PerseusInterfaceCore( new dRealInterface(1)) );
-					new PerseusInterfaceCore( new MathematicaInterface()) );
+					//new PerseusInterfaceCore( new MathematicaInterface()) );
 		thisCommandline.run();
 	}
 

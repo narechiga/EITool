@@ -33,10 +33,10 @@ public class VerificationProblem extends ProblemStatement {
 
 		returnString = returnString +"{ :: verification problem instance\n";
 		returnString = returnString +"stateVariables: " + stateVariables.toString() + "\n";
-		returnString = returnString +"initialSet: " + initialSet.toString() + "\n";
-		returnString = returnString +"safeSet: " + safeSet.toString() + "\n";
+		returnString = returnString +"initialSet: " + initialSet.toMathematicaString() + "\n";
+		returnString = returnString +"safeSet: " + safeSet.toKeYmaeraString() + "\n";
 		returnString = returnString +"eiParameters: " + eiParameters.toString() + "\n";
-		returnString = returnString +"eiParameterSet: " + eiParameterSet.toString() + "\n";
+		returnString = returnString +"eiParameterSet: " + eiParameterSet.toKeYmaeraString() + "\n";
 		returnString = returnString +"envelope: " + envelope.toMathematicaString() + "\n";
 		returnString = returnString +"invariant: " + invariant.toMathematicaString() + "\n";
 		returnString = returnString +"control: " + control.toMathematicaString() + "\n";

@@ -121,7 +121,7 @@ public class PerseusInterfaceCore {
 
 // Allow the user to propose a parameterization for refinement check
 	public boolean proposeRefine( VerificationProblem thisProblem ) throws Exception {
-		System.out.print(ANSI_BOLD + "Propose parameter valuation: " + ANSI_RESET);
+		System.out.print(ANSI_BOLD + ANSI_BLUE + "Propose parameter valuation: " + ANSI_RESET + ANSI_YELLOW);
 
 		Scanner valuationScanner = new Scanner( System.in );
 		String input = valuationScanner.nextLine();
@@ -129,6 +129,8 @@ public class PerseusInterfaceCore {
                 dLLexer myLexer = new dLLexer( inreader );
                 dLParser myParser = new dLParser( myLexer );
                 myParser.parse();
+                
+                System.out.print(ANSI_RESET);
 
 		Valuation parameters = myParser.valuation;
 
@@ -174,7 +176,7 @@ public class PerseusInterfaceCore {
 							thisProblem.envelope,
 							thisProblem.invariant,
 							thisProblem.control,
-							1.0 );
+							0.1 );
 
 		if ( witness == null ) {
 			return false;
@@ -272,6 +274,7 @@ public class PerseusInterfaceCore {
 		System.out.println("find-instance:            finds a valuation of variables that (delta) satisfies the given formuls");
 		System.out.println("clear:                    forgets loaded file");
 		System.out.println("version:                  prints version information");
+		System.out.println("set-solver:               allows choosing between Mathematica and dReal as logical solvers");
 		System.out.println("help:                     prints this help message");
 		System.out.println("exit:                     exits the program");
 

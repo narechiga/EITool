@@ -4,6 +4,8 @@ package perseus.core;
 import java.io.*;
 import java.util.*;
 import proteus.logicsolvers.abstractions.*;
+import proteus.logicsolvers.drealkit.*;
+import proteus.logicsolvers.mathematicakit.*;
 import perseus.verification.*;
 
 public class PerseusCommandLineInterface {
@@ -25,6 +27,10 @@ public class PerseusCommandLineInterface {
 		this.thisInterface = thisInterface;
 	}
 
+	public PerseusCommandLineInterface() {
+		thisInterface = new PerseusInterfaceCore( new dRealInterface(0.0001) );
+	}
+
 	public void run() {
 		VerificationProblem thisProblem = null;
 
@@ -35,7 +41,7 @@ public class PerseusCommandLineInterface {
 				System.out.print( ANSI_BOLD + ANSI_BLUE +"perseus> " + ANSI_RESET + ANSI_YELLOW );
 
 				String input = commandScanner.nextLine();
-				System.out.println( ANSI_RESET );
+				System.out.print( ANSI_RESET );
 				input = input.trim();
 				Scanner in = new Scanner( input );
 
@@ -62,7 +68,7 @@ public class PerseusCommandLineInterface {
 					if ( thisInterface.proposeRefine( thisProblem ) ) {
 						System.out.println(ANSI_BOLD + ANSI_GREEN + "Success!" + ANSI_RESET);
 					} else {
-						System.out.println(ANSI_BOLD + ANSI_YELLOW + "Failure." + ANSI_RESET);
+						System.out.println(ANSI_BOLD + ANSI_RED + "Failure." + ANSI_RESET);
 					}
 
 					in.nextLine();
@@ -90,6 +96,31 @@ public class PerseusCommandLineInterface {
 				} else if ( in.hasNext("parse") ) {
 					in.skip("parse");
 					thisInterface.runParser( in.nextLine() + "\n" );
+
+				} else if ( in.hasNext("set-solver") ) {
+					in.skip("set-solver");
+					String solverName = in.nextLine();
+					if ( solverName.contains("m") || solverName.contains("M") ) {
+						thisInterface = new PerseusInterfaceCore( new MathematicaInterface() );
+						System.out.println(ANSI_BOLD + ANSI_CYAN + "INFO: " + ANSI_RESET + "Set solver to Mathematica.");
+					} else if ( solverName.contains("d") || solverName.contains("D") ) {
+						System.out.print("Enter desired precision for solver dReal: ");
+						double precision = 0.0001;
+
+						try {
+							String number = commandScanner.nextLine();
+							precision = Double.parseDouble( number );
+						} catch ( Exception e ) {
+							System.out.println(ANSI_BOLD + ANSI_YELLOW + "WARNING: " + ANSI_RESET + "Couldn't parse precision, defaulting to 0.0001");
+							thisInterface = new PerseusInterfaceCore( new dRealInterface(0.0001) );
+						}
+
+						thisInterface = new PerseusInterfaceCore( new dRealInterface() );
+						System.out.println(ANSI_BOLD + ANSI_CYAN + "INFO: " + ANSI_RESET + "Set solver to dReal with precision " + precision + ".");
+					} else {
+						System.out.println(ANSI_RED + ANSI_BOLD + "ERROR: " + ANSI_RESET + "Unknown solver.");
+					}
+
 				} else if ( in.hasNext("exit") ) {
 					System.exit(0);
 				} else if ( in.hasNext("quit") ) {
