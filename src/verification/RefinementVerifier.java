@@ -31,13 +31,14 @@ public class RefinementVerifier{
 // 
 	public /*HashMap<dLFormula,Valuation>*/ void parametricVerifyByParts (
 			List<RealVariable> statevariables,
-			List<RealVariable> eiparameters,
+			dLFormula initialSet,
+			dLFormula safeSet,
+			List<RealVariable> eiParameters,
+			dLFormula eiParameterSet,
 			dLFormula envelope,
 			dLFormula invariant,
-			dLFormula eiParameterSet,
-			dLFormula domain,
-			dLFormula controllaw,
-			double resolution ) throws Exception {
+			dLFormula controlLaw,
+			double delta ) throws Exception {
 
 		int numberOfParts = 1;
 		ArrayList<Valuation> parameterSamples;
@@ -47,8 +48,8 @@ public class RefinementVerifier{
 		Valuation thisParameter;
 		boolean success; boolean robustDomainCoverage;
 		do {
-			// Choose the some parameters
-			parameterSamples = cleverlySampleSet( eiParameterSet, numberOfParts, 2*resolution, resolution  );
+			// Choose some parameters
+			parameterSamples = cleverlySampleSet( eiParameterSet, numberOfParts, 2*delta, delta  );
 			if ( parameterSamples.size() < numberOfParts ) {
 				throw new Exception( ANSI_BOLD + ANSI_RED + "No more parameters at this resolution!" 
 								+ ANSI_RESET);
@@ -81,21 +82,21 @@ public class RefinementVerifier{
 			}
 
 			// Check if the overall invariant covers the domain
-			if ( !setARobustlyCoversSetB( overallInvariant, domain ) ) {
-				System.out.println( ANSI_BOLD + ANSI_YELLOW + "WARNING:" + ANSI_RESET 
-							+ " Invariant parametrization does not cover the domain robustly");
-				robustDomainCoverage = false;
-			} else {
-				System.out.println( ANSI_BOLD + ANSI_CYAN + "INFO:" + ANSI_RESET 
-							+" Invariant parametrization covers domain robustly");
-				robustDomainCoverage = true;
-			}
+			//if ( !setARobustlyCoversSetB( overallInvariant, domain ) ) {
+			//	System.out.println( ANSI_BOLD + ANSI_YELLOW + "WARNING:" + ANSI_RESET 
+			//				+ " Invariant parametrization does not cover the domain robustly");
+			//	robustDomainCoverage = false;
+			//} else {
+			//	System.out.println( ANSI_BOLD + ANSI_CYAN + "INFO:" + ANSI_RESET 
+			//				+" Invariant parametrization covers domain robustly");
+			//	robustDomainCoverage = true;
+			//}
 			// Then try refinement with the overall envelope and invariant
 			LogicSolverResult refinementResult = singleRefinementVerificationQuery(
 					statevariables,
 					overallEnvelope,
 					overallInvariant,
-					controllaw );
+					controlLaw );
 			if ( refinementResult.validity.equals("valid") ) {
 				System.out.println( ANSI_BOLD + ANSI_GREEN + "Refinement successful!" + ANSI_RESET); 
 				success = true;
@@ -108,7 +109,7 @@ public class RefinementVerifier{
 			}
 			numberOfParts = 2*numberOfParts;
 
-		} while( (!success ) || (!robustDomainCoverage) );
+		} while( (!success ) );
 
 
 		//return new HashMap<dLFormula,Valuation>();
@@ -459,8 +460,8 @@ public class RefinementVerifier{
 				System.out.println("Adding constraint: ");
 				System.out.println( refinementFormula.plugIn( newSample ).toMathematicaString() );
 				constraints.add( refinementFormula.plugIn( newSample ) );
-				//constraints.add( invariantSafeFormula.plugIn( newSample ) );
-				constraints.add( createBallExclusionFormula(eStar, new Real( delta) ) );
+				//constraints.add( createBallExclusionFormula(eStar, new Real( delta) ) );
+
 			}
 
 			// Pick a new e*
@@ -504,6 +505,7 @@ public class RefinementVerifier{
 							dLFormula controlLaw ) {
 
 		Replacement control = null;
+		dLFormula refinementFormula = null;
 		if ( ( controlLaw instanceof ComparisonFormula )
 			&& ( ((ComparisonFormula)controlLaw).getLHS() instanceof RealVariable ) ) {
 
@@ -511,14 +513,29 @@ public class RefinementVerifier{
 							((RealVariable)(((ComparisonFormula)controlLaw).getLHS())),
 							((ComparisonFormula)controlLaw).getRHS() );
 
-		} else {
-			throw new RuntimeException("Malformed control law: " + controlLaw.toMathematicaString() );
-		}
-
-		dLFormula refinementFormula = new ImpliesFormula(
+			refinementFormula = new ImpliesFormula(
 							invariant,
 							envelope.replace( control )
 							);
+			System.out.println(ANSI_YELLOW + ANSI_BOLD + "WARNING: " + ANSI_RESET + "Assuming that " +
+									((RealVariable)(((ComparisonFormula)controlLaw).getLHS())).toMathematicaString()
+									+ " is the control variable.");
+			System.out.println(ANSI_YELLOW + ANSI_BOLD + "(...)" + ANSI_RESET + " This allows optimizing the refinement query, especially for dReal;");
+			System.out.println(ANSI_YELLOW + ANSI_BOLD + "(...)" + ANSI_RESET + " but if this is incorrect, Perseus will probably loop and eventually crash.");
+			System.out.println(ANSI_YELLOW + ANSI_BOLD + "(...)" + ANSI_RESET + " If this is not the control variable, re-write your control law");
+			System.out.println(ANSI_YELLOW + ANSI_BOLD + "(...)" + ANSI_RESET + " so that it isn't a single comparison with a lone variable on the left-hand side.");
+
+
+		} else {
+			//throw new RuntimeException("Malformed control law: " + controlLaw.toMathematicaString() );
+			//For "implicit" control laws, and control laws with switching
+			refinementFormula = new ImpliesFormula(
+							new AndFormula( invariant, controlLaw ),
+							envelope
+							); 
+			
+		}
+
 
 		System.out.println("Refinement formula is: " + refinementFormula.toMathematicaString() );
 		//System.exit(1);

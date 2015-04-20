@@ -18,7 +18,7 @@ $ENV{"CLASSPATH"} = "/usr/share/java/junit4.jar";
 # Organize
 `rm -rf bin`;
 ### PROTEUS
-`mkdir bin; mkdir bin/manticore; mkdir bin/perseus;`;
+`mkdir bin; mkdir bin/perseus;`;
 `mkdir bin/proteus`;
 `mkdir bin/proteus/analytics`;
 
