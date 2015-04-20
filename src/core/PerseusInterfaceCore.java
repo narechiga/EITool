@@ -72,51 +72,58 @@ public class PerseusInterfaceCore {
 
 			theseParameters.add( thisParser.valuation );
 
-			if ( i == 0 ) { //first time around
-				overallInvariant = thisProblem.invariant.substituteConcreteValuation( 
-								thisParser.valuation );
-				overallEnvelope = new AndFormula( thisProblem.invariant.substituteConcreteValuation(
-									thisParser.valuation ),
-								thisProblem.envelope.substituteConcreteValuation(
-									thisParser.valuation ) );
-			} else {
-				overallInvariant = new OrFormula( overallInvariant,
-							thisProblem.invariant.substituteConcreteValuation(
-								thisParser.valuation ) );
-				overallEnvelope = new OrFormula( overallEnvelope,
-							thisProblem.envelope.substituteConcreteValuation(
-								thisParser.valuation ) );
-			}
+			//if ( i == 0 ) { //first time around
+			//	overallInvariant = thisProblem.invariant.substituteConcreteValuation( 
+			//					thisParser.valuation );
+			//	overallEnvelope = new AndFormula( thisProblem.invariant.substituteConcreteValuation(
+			//						thisParser.valuation ),
+			//					thisProblem.envelope.substituteConcreteValuation(
+			//						thisParser.valuation ) );
+			//} else {
+			//	overallInvariant = new OrFormula( overallInvariant,
+			//				thisProblem.invariant.substituteConcreteValuation(
+			//					thisParser.valuation ) );
+			//	overallEnvelope = new OrFormula( overallEnvelope,
+			//				thisProblem.envelope.substituteConcreteValuation(
+			//					thisParser.valuation ) );
+			//}
 		}
 
-		//if ( !verifier.setARobustlyCoversSetB( overallInvariant, thisProblem.domain ) ) {
-		//	System.out.println( ANSI_BOLD + ANSI_YELLOW + "WARNING:" + ANSI_RESET 
-		//				+ " Invariant parametrization does not cover the domain robustly");
-		//} else {
-		//	System.out.println( ANSI_BOLD + ANSI_CYAN + "INFO:" + ANSI_RESET 
-		//				+" Invariant parametrization covers domain robustly");
-		//}
+		boolean success = verifier.checkParts( 
+					thisProblem.stateVariables,
+					thisProblem.initialSet,
+					thisProblem.safeSet,
+					thisProblem.eiParameters,
+					thisProblem.eiParameterSet,
+					thisProblem.envelope,
+					thisProblem.invariant,
+					thisProblem.control,
+					theseParameters );
+
+		return success;
+
+		
 
 		// Then try refinement with the overall envelope and invariant
-		LogicSolverResult refinementResult = verifier.singleRefinementVerificationQuery(
-				thisProblem.stateVariables,
-				overallEnvelope,
-				overallInvariant,
-				thisProblem.control );
-		System.out.println("Refinement result is: " + refinementResult.toString() );
-		
-		if ( refinementResult.validity.equals("valid") ) {
-			System.out.println( ANSI_BOLD + ANSI_GREEN + "Refinement successful!" + ANSI_RESET);
-			return true;
+		//LogicSolverResult refinementResult = verifier.singleRefinementVerificationQuery(
+		//		thisProblem.stateVariables,
+		//		overallEnvelope,
+		//		overallInvariant,
+		//		thisProblem.control );
+		//System.out.println("Refinement result is: " + refinementResult.toString() );
+		//
+		//if ( refinementResult.validity.equals("valid") ) {
+		//	System.out.println( ANSI_BOLD + ANSI_GREEN + "Refinement successful!" + ANSI_RESET);
+		//	return true;
 
-		} else {//update parameter formula to try a different point
-			System.out.println("delta-counterexample: " + refinementResult.valuation.toMathematicaString() );
-			
-			System.out.println("Refinement " + ANSI_BOLD + ANSI_RED +"not" 
-						+ ANSI_RESET +" succesful with " 
-						+ numberOfParts + " parts, incrementing...");
-			return false;
-		}
+		//} else {//update parameter formula to try a different point
+		//	System.out.println("delta-counterexample: " + refinementResult.valuation.toMathematicaString() );
+		//	
+		//	System.out.println("Refinement " + ANSI_BOLD + ANSI_RED +"not" 
+		//				+ ANSI_RESET +" succesful with " 
+		//				+ numberOfParts + " parts, incrementing...");
+		//	return false;
+		//}
 	}
 
 // Allow the user to propose a parameterization for refinement check
@@ -190,6 +197,17 @@ public class PerseusInterfaceCore {
 	
 // Automatically try to refine by parts	
 	public void autoParts( VerificationProblem thisProblem ) throws Exception {
+		        verifier.parametricVerifyByParts (
+                        			thisProblem.stateVariables,
+                        			thisProblem.initialSet,
+                        			thisProblem.safeSet,
+                        			thisProblem.eiParameters,
+                        			thisProblem.eiParameterSet,
+                        			thisProblem.envelope,
+                        			thisProblem.invariant,
+                        			thisProblem.control,
+                        			0.1 );
+
 		//verifier.parametricVerifyByParts( thisProblem.stateVariables,
 		//			thisProblem.eiParameters,
 		//			thisProblem.envelope,
