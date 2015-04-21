@@ -7,7 +7,7 @@ import proteus.logicsolvers.abstractions.*;
 import java.util.*;
 
 public class VerificationProblem extends ProblemStatement {
-	public dLFormula control;
+	public HybridProgram control;
 
 	public VerificationProblem ( 
 					List<RealVariable> stateVariables, 
@@ -17,7 +17,7 @@ public class VerificationProblem extends ProblemStatement {
 					List<RealVariable> eiParameters, 
 					dLFormula envelope, 
 					dLFormula invariant, 
-					dLFormula control ) {
+					HybridProgram control ) {
 		this.stateVariables = stateVariables;
 		this.initialSet = initialSet;
 		this.safeSet = safeSet;
@@ -39,7 +39,7 @@ public class VerificationProblem extends ProblemStatement {
 		returnString = returnString +"eiParameterSet: " + eiParameterSet.toKeYmaeraString() + "\n";
 		returnString = returnString +"envelope: " + envelope.toMathematicaString() + "\n";
 		returnString = returnString +"invariant: " + invariant.toMathematicaString() + "\n";
-		returnString = returnString +"control: " + control.toMathematicaString() + "\n";
+		returnString = returnString +"control: " + control.toKeYmaeraString() + "\n";
 		returnString = returnString + "}";
 
 		return returnString;

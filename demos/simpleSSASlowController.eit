@@ -1,5 +1,5 @@
 
-/* Only slightly harder than demo zero, requires hunting for the right parameter value */
+/* Slow controller */
 
 \statevariables{
 	d
@@ -30,7 +30,7 @@
 }
 
 \controllaw{
-	u = -0.04*(d + 0.1)
+	u := -0.04*(d + 0.1)
 }
 
 

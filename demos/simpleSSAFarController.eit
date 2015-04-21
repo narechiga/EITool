@@ -1,5 +1,5 @@
 
-/* Only slightly harder than demo zero, requires hunting for the right parameter value */
+/* Far controller */
 
 \statevariables{
 	d
@@ -30,7 +30,7 @@
 }
 
 \controllaw{
-	u = -1*(d + 2.5)
+	u := -1*(d + 2.5)
 }
 
 

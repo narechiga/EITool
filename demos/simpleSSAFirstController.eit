@@ -1,5 +1,5 @@
 
-/* Only slightly harder than demo zero, requires hunting for the right parameter value */
+/*  first */
 
 \statevariables{
 	d
@@ -30,7 +30,7 @@
 }
 
 \controllaw{
-	u = -0.1*(d + 0.1)
+	u := -0.1*(d + 0.1)
 }
 
 

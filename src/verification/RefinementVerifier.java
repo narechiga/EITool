@@ -37,7 +37,7 @@ public class RefinementVerifier{
 			dLFormula eiParameterSet,
 			dLFormula envelope,
 			dLFormula invariant,
-			dLFormula controlLaw,
+			HybridProgram controlLaw,
 			List<Valuation> parameters
 			) throws Exception {
 
@@ -150,7 +150,7 @@ public class RefinementVerifier{
 			dLFormula eiParameterSet,
 			dLFormula envelope,
 			dLFormula invariant,
-			dLFormula controlLaw,
+			HybridProgram controlLaw,
 			double delta ) throws Exception {
 
 
@@ -392,7 +392,7 @@ public class RefinementVerifier{
 //			dLFormula envelope,
 //			dLFormula invariant,
 //			Valuation eiParameterSet,
-//			dLFormula controlLaw ) throws Exception {
+//			HybridProgram controlLaw ) throws Exception {
 //
 //		String comment = "";
 //		ArrayList<dLFormula> theseFormulas = new ArrayList<dLFormula>();
@@ -449,43 +449,45 @@ public class RefinementVerifier{
 			List<RealVariable> statevariables,
 			dLFormula envelope,
 			dLFormula invariant,
-			dLFormula controlLaw ) throws Exception {
+			HybridProgram controlLaw ) throws Exception {
 
 
-		String comment = "";
-		String filename = solver.decorateFilename("refinementQuery");
+		System.out.println("RefinementVerifier.singleRefinementVerificationQuery is out of order.");
+		return null;
+		//String comment = "";
+		//String filename = solver.decorateFilename("refinementQuery");
 
-		// State variables
-		Iterator<RealVariable> stateVariableIterator = statevariables.iterator();
-		comment = comment + solver.commentLine("State variables are");
-		while ( stateVariableIterator.hasNext() ) {
-			comment = comment + solver.commentLine(stateVariableIterator.next().toMathematicaString());
-		}
+		//// State variables
+		//Iterator<RealVariable> stateVariableIterator = statevariables.iterator();
+		//comment = comment + solver.commentLine("State variables are");
+		//while ( stateVariableIterator.hasNext() ) {
+		//	comment = comment + solver.commentLine(stateVariableIterator.next().toMathematicaString());
+		//}
 
-		// Control variables
-		Set<RealVariable> controlVariables = controlLaw.getFreeVariables();
-		controlVariables.removeAll( statevariables );
-		Iterator<RealVariable> controlVariableIterator = controlVariables.iterator();
-		comment = comment + solver.commentLine("Control variables are");
-		while ( controlVariableIterator.hasNext() ) {
-			comment = comment + solver.commentLine(controlVariableIterator.next().toMathematicaString());
-		}
+		//// Control variables
+		//Set<RealVariable> controlVariables = controlLaw.getFreeVariables();
+		//controlVariables.removeAll( statevariables );
+		//Iterator<RealVariable> controlVariableIterator = controlVariables.iterator();
+		//comment = comment + solver.commentLine("Control variables are");
+		//while ( controlVariableIterator.hasNext() ) {
+		//	comment = comment + solver.commentLine(controlVariableIterator.next().toMathematicaString());
+		//}
 
-		// Invariant
-		comment = comment + solver.commentLine("Invariant is") + solver.commentLine(invariant.toMathematicaString());
+		//// Invariant
+		//comment = comment + solver.commentLine("Invariant is") + solver.commentLine(invariant.toMathematicaString());
 
-		// Control law
-		comment = comment + solver.commentLine("Control law is") + solver.commentLine(controlLaw.toMathematicaString());
+		//// Control law
+		//comment = comment + solver.commentLine("Control law is") + solver.commentLine(controlLaw.toMathematicaString());
 
-		// Envelope
-		comment = comment + solver.commentLine("Envelope is")
-				+ solver.commentLine(envelope.toMathematicaString());
+		//// Envelope
+		//comment = comment + solver.commentLine("Envelope is")
+		//		+ solver.commentLine(envelope.toMathematicaString());
 
-		AndFormula invariantAndControl = new AndFormula( invariant, controlLaw );
-		ImpliesFormula invariantAndControlImpliesEnvelope = new ImpliesFormula(
-					invariantAndControl, envelope );
+		//AndFormula invariantAndControl = new AndFormula( invariant, controlLaw );
+		//ImpliesFormula invariantAndControlImpliesEnvelope = new ImpliesFormula(
+		//			invariantAndControl, envelope );
 
-		return solver.checkValidity( filename, invariantAndControlImpliesEnvelope, comment );
+		//return solver.checkValidity( filename, invariantAndControlImpliesEnvelope, comment );
 
 	}
 
@@ -556,7 +558,7 @@ public class RefinementVerifier{
 			dLFormula eiParameterSet,
 			dLFormula envelope,
 			dLFormula invariant,
-			dLFormula controlLaw,
+			HybridProgram controlLaw,
 			double delta ) throws Exception {
 		
 		// Build the refinement formula
@@ -673,47 +675,75 @@ public class RefinementVerifier{
 	protected dLFormula constructRefinementFormula( 
 							dLFormula envelope,
 							dLFormula invariant,
-							dLFormula controlLaw ) {
+							HybridProgram controlLaw ) {
 
+		System.out.println("Examining envelope-invariant-control relationship");
+		
 		Replacement control = null;
 		dLFormula refinementFormula = null;
-		if ( ( controlLaw instanceof ComparisonFormula )
-			&& ( ((ComparisonFormula)controlLaw).getLHS() instanceof RealVariable ) ) {
-
+		if ( ( controlLaw instanceof ConcreteAssignmentProgram ) ) {
 			control = new Replacement(
-							((RealVariable)(((ComparisonFormula)controlLaw).getLHS())),
-							((ComparisonFormula)controlLaw).getRHS() );
+							((ConcreteAssignmentProgram)controlLaw).getLHS(),
+							((ConcreteAssignmentProgram)controlLaw).getRHS() );
 
 			refinementFormula = new ImpliesFormula(
 							invariant,
 							envelope.replace( control )
 							);
-			System.out.println(ANSI_YELLOW + ANSI_BOLD + "WARNING: " + ANSI_RESET + "Assuming that " +
-									((RealVariable)(((ComparisonFormula)controlLaw).getLHS())).toMathematicaString()
-									+ " is the control variable.");
-			System.out.println(ANSI_YELLOW + ANSI_BOLD + "(...)" + ANSI_RESET + " This allows optimizing the refinement query, especially for dReal;");
-			System.out.println(ANSI_YELLOW + ANSI_BOLD + "(...)" + ANSI_RESET + " but if this is incorrect, Perseus will probably loop and eventually crash.");
-			System.out.println(ANSI_YELLOW + ANSI_BOLD + "(...)" + ANSI_RESET + " If this is not the control variable, re-write your control law");
-			System.out.println(ANSI_YELLOW + ANSI_BOLD + "(...)" + ANSI_RESET + " so that it isn't a single comparison with a lone variable on the left-hand side.");
 
+
+		} else if ( controlLaw instanceof ChoiceProgram ) {
+			System.out.println("Found something that looks like a piecewise control law,");
+			List<HybridProgram> controlPieces = ((ChoiceProgram)controlLaw).splitOnChoice();
+
+			dLFormula refinedEnvelopeByRegions = new FalseFormula();
+			dLFormula thisRefinementClause = null;
+			dLFormula thisRegime = null;
+			ConcreteAssignmentProgram thisControl = null;
+			Replacement thisControlReplacement = null;
+			int i = 0;
+			for ( HybridProgram piece : controlPieces ) {
+				if ( (piece instanceof SequenceProgram)
+					&& ((SequenceProgram)piece).getLHS() instanceof TestProgram
+					&& ((SequenceProgram)piece).getRHS() instanceof ConcreteAssignmentProgram ) {
+
+
+					thisRegime = ((TestProgram)((SequenceProgram)piece).getLHS()).getFormula();
+					thisControl = ((ConcreteAssignmentProgram)((SequenceProgram)piece).getRHS());
+
+					thisControlReplacement = new Replacement(
+									thisControl.getLHS(),
+									thisControl.getRHS() 
+									);
+
+					System.out.println("Piece " + i + " is " + 
+								thisControl.toKeYmaeraString() );
+					System.out.println("(...) over region " + thisRegime ); 
+
+					thisRefinementClause = new AndFormula( thisRegime, 
+									envelope.replace(thisControlReplacement  ) );
+
+					refinedEnvelopeByRegions = new OrFormula( refinedEnvelopeByRegions,
+									thisRefinementClause
+									);
+				} else {
+					throw new RuntimeException("Malformed control law: " + controlLaw.toKeYmaeraString() );
+				}
+
+			}
+
+			refinementFormula = new ImpliesFormula(
+							invariant,
+							refinedEnvelopeByRegions );
 
 		} else {
-			//throw new RuntimeException("Malformed control law: " + controlLaw.toMathematicaString() );
-			//For "implicit" control laws, and control laws with switching
-			refinementFormula = new ImpliesFormula(
-							new AndFormula( invariant, controlLaw ),
-							envelope
-							); 
+			throw new RuntimeException("Malformed control law: " + controlLaw.toKeYmaeraString() );
 			
 		}
 
 
 		System.out.println("Refinement formula is: " + refinementFormula.toMathematicaString() );
-		//System.exit(1);
-
 		return refinementFormula;
-
-
 	}
 
 	protected dLFormula constructInvariantInitializedFormula( dLFormula initialSet,
