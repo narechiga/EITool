@@ -249,7 +249,7 @@ public class RefinementVerifier{
 
 				// Add constraints for the new samples
 				for ( Valuation newSample : newSamples ) {
-					System.out.println("(sample is: " + newSample.toMathematicaString() + " )");
+					System.out.println("(validation failed, cex is: " + newSample.toMathematicaString() + " )");
 					System.out.println("Adding constraint: ");
 					System.out.println( OverallRefinement.plugIn( newSample ).toMathematicaString() );
 
@@ -718,7 +718,7 @@ public class RefinementVerifier{
 
 					System.out.println("Piece " + i + " is " + 
 								thisControl.toKeYmaeraString() );
-					System.out.println("(...) over region " + thisRegime ); 
+					System.out.println("(...) over region " + thisRegime.toKeYmaeraString() ); 
 
 					thisRefinementClause = new AndFormula( thisRegime, 
 									envelope.replace(thisControlReplacement  ) );
