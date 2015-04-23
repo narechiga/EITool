@@ -165,6 +165,7 @@ public class RefinementVerifier{
 		dLFormula OverallRefinement = new FalseFormula();
 		Replacement eta = new Replacement();
 
+		int iii = 0;
 		while ( true ) {
 
 			ArrayList<Replacement> partParameters = new ArrayList<>();
@@ -232,6 +233,7 @@ public class RefinementVerifier{
 					&& solver.isValid( OverallRefinement.plugIn( etaStar ) )
 				) {
 
+					System.out.println("Iterations: " + iii);
 					System.out.println(ANSI_GREEN + ANSI_BOLD + "Verified successfully!" + ANSI_RESET );
 					System.out.println("(...) with envelope parameters: "+ ANSI_CYAN + ANSI_BOLD + etaStar.toMathematicaString() + ANSI_RESET );
 					return etaStar;
@@ -242,6 +244,7 @@ public class RefinementVerifier{
 
 				// If there aren't any at this resolution, just go ahead with the constraints on e
 				if ( newSamples.isEmpty() ) {
+					System.out.println("Iterations: " + iii);
 					System.out.println("Couldn't find any more samples!");
 					System.out.println(ANSI_RED + ANSI_BOLD + "Verification failed." + ANSI_RESET);
 					return null;
@@ -262,15 +265,18 @@ public class RefinementVerifier{
 				Valuation newEtaStar = solver.sample( constraints );
 
 				if ( newEtaStar == null ) {
+					System.out.println("Iterations: " + iii);
 					return null;
 
 				} else if ( newEtaStar.getVariables().isEmpty() ) {
+					System.out.println("Iterations: " + iii);
 					System.out.println("Could not find a new parameter value, sample came back empty");
 					System.out.println(ANSI_YELLOW + ANSI_BOLD + "Verification failed with " + numberOfParts + "." + ANSI_RESET);
 					break;
 
 				} else {
 					etaStar = newEtaStar;
+					iii = iii + 1;
 				}
 
 				System.out.println("New parameter is: " + etaStar.toMathematicaString() );
@@ -280,6 +286,7 @@ public class RefinementVerifier{
 			System.out.println("Incrementing to " + numberOfParts + " parts.");
 
 		}
+
 
 	}
 
@@ -580,6 +587,8 @@ public class RefinementVerifier{
 		int i = 0;
 		while ( true ) {
 			i = i + 1;
+			System.out.println("Candidate eStar is: " + eStar.toMathematicaString() );
+
 			
 			// Check if e* is good
 			//System.out.println("Going to check e*...: " + eStar.toMathematicaString() );

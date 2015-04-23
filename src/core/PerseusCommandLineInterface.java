@@ -54,8 +54,12 @@ public class PerseusCommandLineInterface {
 					thisProblem = thisInterface.loadFromFile( in.nextLine().trim() );
 
 				} else if ( in.hasNext("print") ) { 
-					System.out.println( thisProblem.toString() );
-					in.nextLine();
+					if ( thisProblem != null ) {
+						System.out.println( thisProblem.toString() );
+						in.nextLine();
+					} else {
+						System.out.println("No problem loaded.");
+					}
 					
 				} else if ( in.hasNext("auto-refine") ) { 
 					thisInterface.autoRefine( thisProblem );
@@ -126,7 +130,7 @@ public class PerseusCommandLineInterface {
 				} else if ( in.hasNext("quit") ) {
 					System.exit(0);
 				} else if ( in.hasNext() ) {
-					System.out.println("I don't know how to do that.");
+					System.out.println("I don't know how to do that (yet).");
 					in.nextLine();
 				} else {
 				}

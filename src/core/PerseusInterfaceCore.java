@@ -283,8 +283,9 @@ public class PerseusInterfaceCore {
 
 // give help
 	public void giveHelp() {
+		System.out.println(ANSI_BLUE + ANSI_BOLD);
 		System.out.println("load <filename>:          loads a problem file");
-		System.out.println("print                     prints loaded problem instance, if any");
+		System.out.println("print:                    prints loaded problem instance, if any");
 		System.out.println("auto-refine:              attempts automatic refinement on the loaded file");
 		System.out.println("auto-parts:               attempts automatic refinement by parts on the loaded file");
 		System.out.println("propose-refine:           attempts refinement with user-specified parameter valuation");
@@ -295,11 +296,13 @@ public class PerseusInterfaceCore {
 		System.out.println("set-solver:               allows choosing between Mathematica and dReal as logical solvers");
 		System.out.println("help:                     prints this help message");
 		System.out.println("exit:                     exits the program");
+		System.out.println(ANSI_RESET);
 
 	}
 
 // print version
 	public void printVersion() {
+		System.out.println(ANSI_BOLD + ANSI_BLUE);
 		System.out.println(":: Perseus version 0 ::");
 		System.out.println("Copyright 2014 Nikos Arechiga");
  
@@ -314,6 +317,8 @@ public class PerseusInterfaceCore {
 		System.out.println("WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.");
 		System.out.println("See the License for the specific language governing permissions and");
 		System.out.println("limitations under the License.");
+		System.out.println( ANSI_RESET );
+
 	}
 
 }
